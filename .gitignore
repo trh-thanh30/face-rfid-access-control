@@ -1,0 +1,27 @@
+node_modules
+.turbo
+.next
+dist
+coverage
+.venv
+__pycache__
+.pytest_cache
+.ruff_cache
+.env
+.env.*
+!.env.example
+*.log
+storage
+prisma-data
+telegram-notification.preview.*
+.next-*/
+
+# Local source archives must stay outside the active project.
+_legacy/
+booking-system-base/
+
+# TypeScript source-only package: prevent single-file tsc output from being staged.
+packages/shared/src/**/*.js
+packages/shared/src/**/*.js.map
+packages/shared/src/**/*.d.ts
+packages/shared/src/**/*.d.ts.map

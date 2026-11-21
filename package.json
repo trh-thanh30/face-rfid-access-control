@@ -1,0 +1,57 @@
+{
+  "name": "face-rfid-access-control",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "dev": "turbo run dev",
+    "dev:full": "turbo run dev --filter=@access/api --filter=@access/admin --filter=@access/device-simulator",
+    "dev:api": "pnpm --filter @access/api start:dev",
+    "dev:admin": "pnpm --filter @access/admin dev",
+    "dev:simulator": "pnpm --filter @access/device-simulator dev",
+    "dev:vision": "python3 -m uvicorn app.main:app --reload --app-dir apps/vision --port 8001",
+    "build": "turbo run build",
+    "build:api": "pnpm --filter @access/shared build && pnpm --filter @access/api build",
+    "build:admin": "pnpm --filter @access/shared build && pnpm --filter @access/admin build",
+    "lint": "turbo run lint",
+    "check-types": "turbo run check-types",
+    "typecheck": "pnpm check-types",
+    "test": "turbo run test",
+    "test:api": "pnpm --filter @access/api test",
+    "test:contracts": "pnpm --filter @access/shared test",
+    "contracts:generate": "pnpm --filter @access/shared generate:firmware",
+    "contracts:check": "pnpm --filter @access/shared check:firmware",
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"apps/{api,admin,device-simulator}/**/*.{ts,tsx,js,mjs,json,md,css}\" \"packages/shared/**/*.{ts,js,mjs,json,md}\" \"*.{json,md,yml,yaml}\" \".github/**/*.yml\"",
+    "prisma:generate": "pnpm --filter @access/api prisma:generate",
+    "prisma:migrate:dev": "pnpm --filter @access/api prisma:migrate",
+    "db:seed:dev": "pnpm --filter @access/api db:seed",
+    "infra:dev:up": "docker compose -f docker-compose.dev.yml --env-file .env.development up -d db",
+    "infra:dev:down": "docker compose -f docker-compose.dev.yml --env-file .env.development down",
+    "infra:dev:logs": "docker compose -f docker-compose.dev.yml --env-file .env.development logs -f db"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.4.2",
+    "@commitlint/config-conventional": "^20.4.2",
+    "eslint": "^9.39.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.4.2",
+    "turbo": "^2.8.10",
+    "typescript": "5.9.2"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}

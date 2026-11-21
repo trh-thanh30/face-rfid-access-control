@@ -1,0 +1,35 @@
+{
+  "name": "@access/admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack -p 3001",
+    "build": "next build --turbopack",
+    "start": "next start -p 3001",
+    "lint": "eslint . --max-warnings 0 && node ../../packages/ui/scripts/validate-design-tokens.mjs --admin",
+    "check-types": "next typegen && tsc --noEmit",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@access/shared": "workspace:*",
+    "@repo/hooks": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "next": "15.5.24",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.2.0",
+    "@types/node": "^22.15.3",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "eslint": "^9.39.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.13",
+    "typescript": "5.9.2"
+  }
+}

@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@import "@repo/ui/styles.css";
+
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+
+:root {
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  background: var(--ds-background);
+  color: var(--ds-foreground);
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+button,
+input {
+  font: inherit;
+}
+a {
+  color: inherit;
+}
+
+.page-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.panel {
+  width: min(100%, 440px);
+  padding: 32px;
+  border: 1px solid var(--ds-border);
+  border-radius: 18px;
+  background: var(--ds-card);
+  box-shadow: 0 18px 60px
+    color-mix(in srgb, var(--ds-foreground) 10%, transparent);
+}
+
+.panel h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+.muted {
+  color: var(--ds-muted-foreground);
+}
+.form {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+.field {
+  display: grid;
+  gap: 7px;
+  font-weight: 600;
+}
+.field input {
+  border: 1px solid var(--ds-input);
+  border-radius: 10px;
+  padding: 11px 12px;
+}
+.primary {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  background: var(--ds-primary);
+  color: var(--ds-primary-foreground);
+  font-weight: 700;
+  cursor: pointer;
+}
+.primary:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.error {
+  color: var(--ds-danger);
+  font-size: 14px;
+}
+.success {
+  color: var(--ds-success);
+  font-size: 14px;
+}
+.dashboard {
+  min-height: 100vh;
+  padding: 40px;
+}
+.dashboard header {
+  max-width: 1100px;
+  margin: 0 auto 28px;
+}
+.cards {
+  max-width: 1100px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+.card {
+  padding: 22px;
+  border: 1px solid var(--ds-border);
+  border-radius: 16px;
+  background: var(--ds-card);
+}
+.card strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 26px;
+}

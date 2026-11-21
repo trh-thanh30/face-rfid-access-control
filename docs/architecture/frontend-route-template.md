@@ -1,0 +1,155 @@
+# Frontend Route Template
+
+Template này dùng khi thêm route mới vào `apps/web` hoặc `apps/platform-admin`. Business Admin routes nằm dưới `app/[locale]/admin`, views tại `src/views/admin/<feature>`.
+
+## Route Page
+
+`app/(group)/example/page.tsx`
+
+```tsx
+import { ExampleView } from "@/src/views/example/example.view";
+
+export default function ExamplePage() {
+  return <ExampleView />;
+}
+```
+
+Rule:
+
+- Không thêm `"use client"` vào `page.tsx`.
+- Không đặt UI logic, state, table columns, mock data hoặc helper function trong `page.tsx`.
+- `page.tsx` chỉ compose view.
+
+## View Folder
+
+```txt
+src/views/example/
+├── example.view.tsx
+├── constants/
+│   └── example.constants.ts
+├── types/
+│   └── example.types.ts
+├── utils/
+│   └── example.utils.ts
+├── columns/
+│   └── example.columns.tsx
+├── components/
+│   └── example-table.tsx
+└── index.ts
+```
+
+Không phải feature nào cũng cần đủ mọi file. Tạo file khi feature thật sự cần.
+File hỗ trợ luôn nằm trong folder theo hậu tố chức năng, kể cả chỉ có một file.
+`*.view.tsx` và `index.ts` export-only ở cấp feature; mock data, hooks và schemas
+lần lượt đặt trong `data/`, `hooks/` và `schemas/` khi cần.
+
+## View
+
+`src/views/example/example.view.tsx`
+
+```tsx
+import {
+  AdminPage,
+  AdminPageHeader,
+} from "@/src/components/common/admin/admin-page";
+
+export function ExampleView() {
+  return (
+    <AdminPage>
+      <AdminPageHeader
+        description="Short description for the route."
+        eyebrow="Section"
+        title="Example"
+      />
+    </AdminPage>
+  );
+}
+```
+
+Ví dụ này áp dụng cho Business Admin trong `apps/web`. Public/Marketing và
+Platform Admin dùng composition riêng của boundary tương ứng, nhưng vẫn compose
+primitive và semantic token từ `@repo/ui`.
+
+## Constants
+
+`src/views/example/constants/example.constants.ts`
+
+```ts
+export const exampleTabs = [
+  {
+    label: "Overview",
+    value: "overview",
+  },
+  {
+    label: "Settings",
+    value: "settings",
+  },
+] as const;
+```
+
+## Types
+
+`src/views/example/types/example.types.ts`
+
+```ts
+export type ExampleViewMode = "table" | "cards";
+export type ExampleStatusFilter = "all" | "active" | "inactive";
+```
+
+Rule: file này chỉ chứa type phục vụ view/local UI state. Type dữ liệu trả về từ API hoặc domain contract phải đặt trong `packages/shared/src/types`.
+
+## Utils
+
+`src/views/example/utils/example.utils.ts`
+
+```ts
+import type { ExampleItem } from "@/src/views/example/types/example.types";
+
+export function isExampleActive(item: ExampleItem) {
+  return item.status === "active";
+}
+```
+
+## Columns
+
+`src/views/example/columns/example.columns.tsx`
+
+```tsx
+import type { ColumnDef } from "@tanstack/react-table";
+import type { ExampleItemSummary } from "@repo/shared";
+
+export const exampleColumns: ColumnDef<ExampleItemSummary>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+  },
+];
+```
+
+## Barrel
+
+`src/views/example/index.ts`
+
+```ts
+export * from "./example.view";
+export * from "./constants/example.constants";
+export * from "./types/example.types";
+export * from "./utils/example.utils";
+```
+
+Không viết implementation trong `index.ts`.
+
+## Checklist
+
+- [ ] `page.tsx` chỉ import view.
+- [ ] View nằm trong `src/views/<feature>`.
+- [ ] Feature component riêng nằm trong `src/views/<feature>/components`.
+- [ ] API/domain DTO được đặt trong `packages/shared/src/types`.
+- [ ] `<feature>.types.ts` chỉ chứa type phục vụ view/local UI state.
+- [ ] Component dùng lại nhiều view nằm trong `src/components/common`.
+- [ ] `index.ts` chỉ export.
+- [ ] Chạy `check-types`, `lint`, `build` cho app bị ảnh hưởng.

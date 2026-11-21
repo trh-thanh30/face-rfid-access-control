@@ -1,0 +1,32 @@
+{
+  "name": "@access/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && tsc-alias -p tsconfig.json",
+    "check-types": "tsc --noEmit",
+    "generate:firmware": "pnpm run build && node scripts/generate-firmware-contract.mjs",
+    "check:firmware": "pnpm run build && node scripts/generate-firmware-contract.mjs --check",
+    "lint": "eslint . --max-warnings 0",
+    "test": "pnpm run build && node scripts/generate-firmware-contract.mjs --check && node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "eslint": "^9.39.1",
+    "tsc-alias": "^1.8.16",
+    "typescript": "5.9.2"
+  }
+}

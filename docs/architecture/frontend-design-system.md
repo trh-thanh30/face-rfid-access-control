@@ -1,0 +1,474 @@
+# Shared Frontend Design System
+
+Tài liệu này quy định nền tảng giao diện dùng chung cho `apps/web` (Landing + Business Admin), `apps/platform-admin` và các frontend được thêm sau này.
+
+Mục tiêu của DS-001 là tạo cùng một ngôn ngữ thiết kế, không dựng lại layout
+hoặc màn hình. Hướng hình ảnh là booking SaaS sáng, sạch, tin cậy; tham khảo
+tinh thần của SimplyBook.me nhưng không sao chép component hay bố cục của họ.
+
+## Nguồn Token
+
+Design token nằm trong `packages/ui/src/styles`:
+
+```txt
+styles/
+├── colors.css       # primitive color scales
+├── semantic.css     # token theo vai trò và light/dark mode
+├── typography.css   # font family và type scale
+├── components.css   # radius, shadow, motion
+├── base.css         # global reset, focus, reduced motion
+└── index.css        # public entry point
+```
+
+Mỗi app chỉ import một entry point sau trong `app/globals.css`:
+
+```css
+@import "tailwindcss";
+@import "@repo/ui/styles.css";
+```
+
+Không định nghĩa lại brand palette trong từng app.
+
+## Color Scales
+
+Các nhóm màu đều có đủ cấp `50`, `100`, `200`, `300`, `400`, `500`, `600`,
+`700`, `800`, `900`, `950`:
+
+- `primary`: xanh dương thương hiệu; `primary-600` là `#006aff`.
+- `neutral`: nền, chữ, border và surface trung tính.
+- `success`: trạng thái hoàn thành hoặc thành công.
+- `warning`: trạng thái cần chú ý.
+- `danger`: lỗi, destructive action hoặc trạng thái nguy hiểm.
+- `info`: thông tin bổ trợ không mang ý nghĩa thành công/thất bại.
+
+Tailwind utility được sinh trực tiếp từ token:
+
+```tsx
+<section className="bg-primary-50 text-primary-900" />
+<button className="bg-primary-600 hover:bg-primary-700" />
+<p className="text-danger-700 dark:text-danger-300" />
+<div className="border-neutral-200 dark:border-neutral-800" />
+```
+
+### Khi nào dùng numbered token
+
+Dùng numbered token khi sắc độ là một phần có chủ đích của biểu đạt, ví dụ
+status badge, data visualization hoặc decorative brand section.
+
+Không dùng `blue-*`, `slate-*`, `red-*`, `emerald-*` trực tiếp trong shared
+component. Các tên đó gắn UI với palette của Tailwind thay vì brand system.
+
+## Semantic Tokens
+
+Component nền tảng phải ưu tiên semantic utility để tự thích nghi light/dark:
+
+| Vai trò            | Utility điển hình                            |
+| :----------------- | :------------------------------------------- |
+| App canvas         | `bg-background text-foreground`              |
+| Surface/card       | `bg-surface`, `bg-card text-card-foreground` |
+| Brand action       | `bg-primary text-primary-foreground`         |
+| Hover/active       | `bg-primary-hover`, `bg-primary-active`      |
+| Secondary action   | `bg-secondary text-secondary-foreground`     |
+| Supporting content | `bg-muted text-muted-foreground`             |
+| Boundary/input     | `border-border`, `border-input`              |
+| Keyboard focus     | `ring-ring`                                  |
+| Destructive action | `bg-danger text-danger-foreground`           |
+| Disabled state     | `bg-disabled text-disabled-foreground`       |
+
+Ở light mode, `bg-primary` ánh xạ đến `primary-600`. Ở dark mode, semantic
+primary chuyển sang `primary-500` để giữ độ nổi trên nền tối. Nếu yêu cầu sắc độ
+cố định bất kể theme, dùng `bg-primary-600` một cách rõ ràng.
+
+Dark mode được kích hoạt bằng class `.dark` ở root. Không tự thêm media query
+`prefers-color-scheme` trong feature vì theme cần được app kiểm soát nhất quán.
+
+Các utility `bg-brand-blue`, `bg-bg-primary`, `text-text-primary` theo vocabulary cũ của
+Landing hiện chỉ là lớp tương thích trong giai đoạn migration. Không dùng chúng
+cho code mới; chúng sẽ được loại bỏ sau khi Landing đã chuyển hết sang semantic
+token chuẩn.
+
+## Typography
+
+Font chung là **Plus Jakarta Sans**, được nạp bởi Next.js layout và truyền qua
+CSS variable `--font-plus-jakarta-sans`. Fallback luôn có system sans-serif.
+
+Type utilities dùng chung:
+
+- `text-display`
+- `text-heading-1`, `text-heading-2`, `text-heading-3`
+- `text-heading-4`, `text-heading-5`, `text-heading-6`
+- `text-body`
+- `text-label`
+- `text-caption`
+
+Feature có thể dùng type scale mặc định của Tailwind khi phù hợp, nhưng không tự
+khai báo font family hoặc một bộ heading scale khác trong app.
+
+## Shape, Elevation Và Motion
+
+- Radius: `rounded-sm`, `rounded-md`, `rounded-lg`, `rounded-xl` dùng shared
+  radius tokens.
+- Elevation: `shadow-xs`, `shadow-sm`, `shadow-md`, `shadow-lg`.
+- Motion: nhanh `120ms`, chuẩn `200ms`, chậm `320ms` với easing chung.
+- Mọi animation phải tôn trọng `prefers-reduced-motion`; base stylesheet đã có
+  fallback toàn cục.
+
+Không dùng transition dài cho hover/focus thông thường. Trạng thái tương tác cần
+rõ ràng nhưng không làm chậm thao tác trong dashboard.
+
+## Toast Notifications
+
+Mỗi app mount một `Toaster` từ shared UI trong root layout:
+
+```tsx
+import { Toaster } from "@repo/ui/sonner";
+
+<Toaster />;
+```
+
+Trong client component, dùng shared hook thay vì import Sonner trực tiếp cho code mới:
+
+```tsx
+import { useToast } from "@repo/hooks";
+
+const { toast } = useToast();
+toast.success("Đã lưu thay đổi");
+toast.error("Không thể lưu", { description: "Vui lòng thử lại." });
+```
+
+Hook giữ nguyên toàn bộ Sonner API, bao gồm `promise`, `loading`, `dismiss`, action
+và custom toast. `Toaster` dùng semantic status token nên tự thích nghi light/dark mode.
+Component và feature hook phải lấy `toast` qua `useToast`; chỉ shared wrapper và
+Toaster primitive được import Sonner trực tiếp. Nhờ đó frontend dùng một API
+notification thống nhất và có thể thay provider tại shared package.
+
+### Quy tắc phản hồi form
+
+- Lỗi validation gắn với một field (sai định dạng, thiếu dữ liệu, mật khẩu không
+  khớp) hiển thị ngay dưới field bằng `FormField`; control phải có
+  `aria-invalid` và liên kết tới nội dung lỗi. Không dùng toast thay cho lỗi field.
+  Không render trực tiếp `ZodIssue.message` hoặc `Error.message`: schema dùng
+  chung không biết locale hiện tại và backend message có thể không phù hợp để
+  công khai. View phải map field/error code sang translation key rồi gọi `t(...)`.
+- Lỗi nghiệp vụ hoặc lỗi submit áp dụng cho toàn form (email đã tồn tại, thao tác
+  bị từ chối, lưu thất bại, lỗi mạng tạm thời) hiển thị bằng `toast.error` qua
+  `useToast`. Không tạo thêm banner đỏ bên trong form cho cùng lỗi đó.
+- Thành công sau một hành động submit dùng `toast.success`, trừ khi màn hình đã
+  chuyển sang một success state riêng có đầy đủ ngữ cảnh.
+- Banner/`StatePanel` chỉ dành cho trạng thái nội dung cần tồn tại lâu dài, ví dụ
+  không có quyền truy cập, tài nguyên không tồn tại hoặc một vùng dữ liệu không
+  thể tải. Không dùng banner như notification tạm thời. Session Auth hết hạn phải
+  dùng toast kèm recovery UI phù hợp (form yêu cầu mã mới, CTA đăng nhập lại),
+  không render thêm banner đỏ trong form.
+- Không lặp cùng một thông báo ở cả toast và banner. Khi cần vừa chỉ vị trí lỗi
+  vừa thông báo kết quả (ví dụ OTP sai), toast nêu lỗi nghiệp vụ còn field chỉ
+  hiển thị câu ngắn và visual invalid để hướng người dùng về đúng control.
+
+## Component Rules
+
+- Các field nhập liệu (`Input`, `Textarea`, `Select`, phone input và rich text
+  editor) dùng `bg-card` làm nền control. Ở light mode token này là trắng; ở
+  dark mode nó tự chuyển sang surface tối. Không dùng `bg-background` cho field
+  vì đó là token của app canvas và sẽ làm control chìm vào nền trang.
+- Các input trong luồng Auth/onboarding dùng `AuthInput` compose shared `Input`
+  và giữ nguyên quy tắc nền field ở trên.
+  Trường email dùng `EmailInput` chung với icon mail bên trái; login dùng cùng
+  component với `type="text"` để vẫn nhận username. Disabled state giữ nguyên.
+  Login có CTA đăng ký rõ ràng dẫn đến `/signup-business`, giữ locale hiện tại.
+- Input/textarea nhập văn bản, email, số và mật khẩu phải có placeholder mô tả
+  hoặc example value theo locale. Không dùng placeholder thay cho label; không
+  ghi example vào `defaultValue` như dữ liệu người dùng. Hidden/checkbox/radio,
+  native time/date/color không có placeholder hiển thị: dùng label và hint/example
+  thích hợp; readonly field hiển thị giá trị thật. Không dùng mật khẩu thật làm ví dụ.
+- Trường bắt buộc phải truyền `required` cho `FormField`. `FormField` chịu trách
+  nhiệm hiển thị dấu `*` bằng semantic `text-destructive` và gắn
+  `aria-required` cho control. Prop này phải khớp schema/contract; trường tùy
+  chọn không được có dấu `*`. Không tự nối dấu `*` vào translation hoặc label
+  của từng màn hình.
+- `PasswordInput` dùng lock bên trái, eye toggle bên phải; eye không đổi nền/màu
+  khi hover nhưng vẫn giữ focus-visible, aria-label, disabled và vùng bấm 44px.
+- Nút Google dùng `GoogleIcon` chung với asset màu tại `public/icons/google.svg`.
+  Component dùng `Image` từ `next/image`, kích thước 20×20 và `alt=""` vì tên
+  hành động đã có trong button; không thay bằng native img để lách test runner.
+  Màu trong asset logo là ngoại lệ brand bên thứ ba, không phải token giao diện.
+
+- Shared primitive nằm ở `packages/ui` và dùng semantic token làm mặc định.
+- API public hiện tại của component phải được giữ ổn định khi chỉ đổi styling.
+- Mọi interactive component phải có `focus-visible` rõ ràng.
+- Disabled state cần đồng thời có visual state và behavior (`disabled` hoặc
+  `aria-disabled`) đúng.
+- Không chỉ dùng màu để truyền đạt lỗi hoặc trạng thái; luôn có text, icon hoặc
+  label phù hợp.
+- Text và control thông thường phải đạt WCAG AA. Cặp brand mặc định
+  `primary-600`/white đạt tỷ lệ tương phản tối thiểu 4.5:1.
+- Không đưa business rule hoặc feature-specific variant vào `packages/ui`.
+
+### Rich Text Editor
+
+Nội dung có định dạng dùng `RichTextEditor` từ `@repo/ui/rich-text-editor`.
+Component lưu nội dung dưới dạng HTML và cung cấp các thao tác văn bản, heading,
+list, quote/code, căn lề, link, undo/redo, placeholder, disabled/invalid state và
+giới hạn ký tự. Toolbar dùng tooltip, trạng thái `aria-pressed`, touch target 44px
+và semantic token để hoạt động nhất quán ở light/dark mode.
+
+Ảnh, video và tài liệu được chọn từ toolbar khi consumer truyền `onUpload`:
+
+- `@repo/ui` sở hữu file picker, trạng thái upload/progress và việc chèn nội dung.
+- Ảnh/video được chèn vào document; tài liệu được chèn thành link có tên file.
+- App sở hữu HTTP client, quyền truy cập, folder/entity metadata, chunk/retry và
+  chuyển response API sang `RichTextUploadedAsset`.
+- Adapter báo tiến độ theo thang `0..100` qua `onProgress`; editor khóa chỉnh sửa
+  trong lúc upload để giữ đúng vị trí chèn đã chọn.
+- `onAssetsUploaded` dùng để feature lưu asset ID hoặc relation nếu nghiệp vụ cần.
+- Nếu một batch upload lỗi giữa chừng, các file đã upload thành công vẫn được
+  chèn và trả về consumer; lỗi của file hiện tại được hiển thị inline.
+- Khi consumer truyền `onDeleteAsset`, media có `assetId` hiển thị nút xóa và
+  dialog xác nhận. Editor chỉ loại node khỏi HTML sau khi callback xóa storage
+  và metadata thành công; lỗi xóa được giữ lại inline để người dùng thử lại.
+
+```tsx
+<RichTextEditor
+  value={field.value}
+  onChange={field.onChange}
+  onUpload={async (file, { kind, onProgress }) => {
+    const asset = await uploadRichTextAsset(file, { kind, onProgress });
+
+    return {
+      id: asset.id,
+      kind,
+      mimeType: asset.mime_type,
+      name: asset.original_name,
+      url: asset.url,
+    };
+  }}
+  onDeleteAsset={async (asset) => {
+    if (!asset.id) throw new Error("Asset ID is required");
+    await deleteAsset(asset.id);
+  }}
+/>
+```
+
+Không gọi API hoặc import service của Web/Platform Admin từ `packages/ui`.
+Nội dung HTML phải được sanitize ở backend trước khi lưu/publish và sanitize lại
+khi render ở public surface. Nếu không truyền `onDeleteAsset`, việc bỏ node khỏi
+HTML không được hiểu là đã xóa file vật lý; feature vẫn phải có cleanup policy
+theo relation/reference của chính nó.
+
+### Media Uploader
+
+Form cần quản lý một tập ảnh, video hoặc tài liệu dùng `MediaUploader` từ
+`@repo/ui/media-uploader`. Component cung cấp drag-and-drop, chọn nhiều file,
+preview, validation, tiến độ theo từng file, cancel, retry và xác nhận xóa asset.
+
+`@repo/ui` không gọi API. App truyền `onUpload` và ánh xạ response thành
+`UploadedMediaAsset`; callback nhận `AbortSignal` và `onProgress`. Adapter có thể
+gửi một multipart request hoặc chia file thành chunk rồi tổng hợp tiến độ về
+thang `0..100` mà không thay đổi component. Khi truyền `onRemove`, callback phải
+xóa storage và metadata thành công trước khi uploader loại asset khỏi danh sách.
+
+```tsx
+<MediaUploader
+  assets={assets}
+  onAssetsChange={setAssets}
+  onUpload={(file, { kind, onProgress, signal }) =>
+    uploadMedia(file, { kind, onProgress, signal })
+  }
+  onRemove={(asset) => deleteAsset(asset.id)}
+/>
+```
+
+Các giới hạn dung lượng, số file, MIME type và loại media phải được cấu hình lại
+theo contract của feature. Validation phía client chỉ phục vụ UX; backend vẫn
+phải kiểm tra MIME/signature, kích thước, quyền và ownership của asset.
+
+## Migration Rule
+
+DS-001 chỉ chuẩn hóa foundation và shared primitives. Không bulk-rewrite toàn bộ
+feature UI trong cùng task.
+
+Khi sửa một màn hình về sau:
+
+1. Thay màu hard-code hoặc palette Tailwind trực tiếp bằng semantic token.
+2. Chỉ dùng numbered token khi cần kiểm soát sắc độ cụ thể.
+3. Tái sử dụng primitive từ `@repo/ui` trước khi tạo component tương đương trong
+   app.
+4. Giữ component riêng của feature tại `src/views/<feature>/components`.
+5. Kiểm tra light mode, dark mode, keyboard focus và disabled state.
+
+Chạy kiểm tra token của shared UI bằng:
+
+```bash
+pnpm --filter @repo/ui validate:tokens
+```
+
+### Business Admin Dashboard — DS-003
+
+Protected Business Admin routes under `/{locale}/admin/*` compose shared
+primitives through `apps/web/src/components/common/admin`:
+
+- `AdminPage` and `AdminPageHeader` define route spacing and heading hierarchy.
+- `AdminStatsGrid` and `AdminStatsCard` define responsive operational metrics.
+- `AdminTableContainer` owns the list title/description, search-filter toolbar
+  slot, table boundary, horizontal overflow and optional footer. Search and
+  filters belong in this surface instead of a separate card above the table.
+- `AdminDataTable<TData>` owns TanStack row rendering, sorting state, semantic
+  table markup and accessible sortable headers; it forwards title, toolbar and
+  footer slots to `AdminTableContainer`. Feature columns and filter state stay
+  in `src/views/<feature>`.
+- `AdminTableActions` is the standard row-action trigger: a 44px ellipsis
+  button with an accessible label and a shared `DropdownMenu`. Do not place a
+  row of edit/delete icon buttons directly in the action cell.
+
+Keep loading, error and empty-state decisions at view level because they depend
+on the feature query and available recovery actions, but render them inside the
+same `AdminTableContainer` surface so the list heading and filters remain
+stable. A hierarchical or manually ordered table may disable sorting per column
+when sorting would break its parent-child or explicit ordering semantics.
+
+#### Status filter và lifecycle-retired records
+
+Lựa chọn mặc định của status filter chỉ đại diện cho các bản ghi **hiện hành**,
+không phải mọi trạng thái trong database. Bản ghi `ARCHIVED` hoặc soft-deleted
+phải bị loại khỏi kết quả mặc định và chỉ xuất hiện khi người dùng chủ động chọn
+đúng trạng thái tương ứng.
+
+- Ưu tiên nhãn `Current`, `Current records` hoặc bản dịch tương đương thay cho
+  `All statuses`, vì "all" dễ khiến người dùng hiểu rằng kết quả gồm cả dữ liệu
+  đã archive/xóa mềm.
+- Giá trị UI mặc định dùng sentinel như `CURRENT`; không gửi sentinel này sang
+  API. Query mặc định bỏ `status` và giữ `include_archived=false`,
+  `include_deleted=false` (hoặc contract tương đương).
+- Chỉ khi chọn `Archived` mới gửi `status=ARCHIVED` và bật
+  `include_archived=true`. Chỉ khi chọn `Deleted` mới bật contract đọc dữ liệu
+  soft-deleted, ví dụ `status=DELETED` hoặc `include_deleted=true`.
+- Entity chỉ hiển thị các option lifecycle mà domain của nó thực sự hỗ trợ. Nếu
+  model chỉ có archive thì không thêm `Deleted`; nếu chỉ có soft delete thì
+  không thêm `Archived`.
+- Chọn `Active`, `Inactive` hoặc trạng thái hiện hành khác không được tự động bật
+  cờ lấy dữ liệu archived/deleted. Backend vẫn phải áp dụng mặc định an toàn khi
+  client không truyền các cờ này.
+- Search, pagination, count và empty state phải dùng cùng lifecycle filter để
+  tổng số bản ghi không lệch với các hàng đang hiển thị.
+
+Use `background` for the app canvas, `surface` for navigation/header regions,
+`card` for content containers, `popover` for overlays, `accent` for selected
+navigation and `primary` for brand actions. Semantic tokens already switch with
+the theme; do not add equivalent `.dark` classes. Admin navigation must expose a
+skip link, visible keyboard focus, real active routes and an explicit disabled
+state for destinations that are not implemented.
+
+### Route-based Admin Forms
+
+Form tạo hoặc chỉnh sửa một resource chính phải là route riêng, không mở trong
+`Dialog`. Route riêng tạo deep-link, giữ đúng browser history và có đủ không gian
+cho validation, asset, relation cũng như các section có thể mở rộng về sau.
+
+- List page dẫn tới `/<resource>/new` và `/<resource>/[id]/edit` bằng localized
+  `Link`; không dùng state `open/editingItem` để điều khiển form CRUD chính.
+- Dùng `AdminFormPage` cho back navigation và heading `h1`. Form có media hoặc
+  metadata phụ dùng `AdminFormLayout`, `AdminFormMain` và `AdminFormSidebar` để
+  tạo bố cục nội dung chính + sidebar nhất quán; sidebar tự chuyển xuống dưới ở
+  viewport nhỏ. Dùng `AdminFormSection` cho card nhóm field và
+  `AdminFormActions` cho vùng Cancel/Submit.
+- Chỉ có một primary submit action. Cancel là secondary action và quay lại list.
+- Submit phải có pending state, khóa thao tác lặp và phản hồi bằng shared toast.
+- Field lỗi hiển thị gần control qua `FormField`; lỗi nghiệp vụ dùng toast.
+- Resource có cặp `name`/`slug` phải dùng `createSlug` từ `@repo/shared` và
+  shared slug-autofill utility thay vì tự viết regex trong feature. Create form
+  tự đề xuất slug trong lúc nhập name; sau khi người dùng sửa slug trực tiếp thì
+  không được ghi đè nữa. Giá trị được restore trong create form vẫn theo name cho
+  đến khi người dùng sửa ô slug. Edit form cũng đồng bộ slug khi name thay đổi;
+  sau khi người dùng sửa trực tiếp ô slug thì giá trị tùy chỉnh phải được giữ lại.
+- Loading, not-found, permission và load-error phải có state riêng. Edit route
+  không phụ thuộc dữ liệu đã cache từ list page.
+- Dialog chỉ dùng cho xác nhận, tác vụ ngắn hoặc nội dung phụ trợ; destructive
+  confirmation vẫn dùng `ConfirmDialog`.
+- Form và action bar phải dùng semantic token, hoạt động ở light/dark mode,
+  không gây horizontal scroll ở 375px và giữ touch target tối thiểu 44px.
+
+## Landing Page — DS-002
+
+Web dùng Blue Brand Theme từ shared tokens; không định nghĩa lại palette trong
+`apps/web/app/globals.css`. Trang mặc định Light. Semantic stylesheet vẫn hỗ trợ
+`.dark` và được kiểm tra riêng. ARCH-001 dùng một theme provider chung mặc định Light; Admin theme toggle áp dụng cùng theme cho Landing, không tự chọn system theme.
+
+Composition marketing nằm tại `apps/web/src/components/common/landing-compositions.tsx`:
+
+- `LandingContainer`: `max-w-landing` (80rem), mobile gutters 16px → 24px → 32px.
+- `LandingSection`: nhịp section 48px mobile / 80px desktop.
+- Breakpoint dùng Tailwind mobile-first chuẩn: sm 40rem, md 48rem, lg 64rem, xl 80rem, 2xl 96rem; không tạo breakpoint riêng theo từng section.
+- `SectionHeading`: eyebrow, h2 và mô tả theo shared typography; không chứa wording.
+- `MarketingButton`: compose shared Button, control tối thiểu 44px, variant primary/secondary/outline/ghost.
+- `FeatureCard`, `PricingCard`, `TestimonialCard`: compose shared Card; featured pricing dùng border/ring primary. Testimonial có figure/blockquote/figcaption; không thêm testimonial giả.
+- Motion utility shared: `duration-fast`, `duration-normal`, `duration-slow` (120/200/320ms); reduced motion override ở base stylesheet.
+
+```tsx
+<LandingSection id="features">
+  <LandingContainer>
+    <SectionHeading
+      title="Features"
+      description="Booking tools for your team"
+    />
+    <FeatureCard>...</FeatureCard>
+    <MarketingButton asChild>
+      <Link href="/signup-business">Start</Link>
+    </MarketingButton>
+  </LandingContainer>
+</LandingSection>
+```
+
+`MotionButton` tái sử dụng `buttonVariants`; `MotionCard` bọc FeatureCard. Animation
+hiện có được giữ lại, có reduced-motion fallback. Mockup dashboard/phone có thể
+dùng type size nhỏ để minh họa; chữ hướng dẫn, form và CTA thật không lấy size đó
+làm mặc định. Shared tokens là foundation, utility theo ngữ cảnh vẫn được phép.
+
+Header dùng shared DropdownMenu/Sheet cho keyboard navigation, Escape và focus
+management. Locale selector native dùng ở header/mobile/footer; chỉ Việt/Anh,
+lấy locale từ route và giữ path/query/hash qua `next-intl`. Chỉ navigation/form
+và metadata được localized trong DS-002; marketing copy tiếng Anh hiện có không
+được dịch lại trong task này.
+
+Modal feedback và bảng so sánh dùng shared Dialog cho focus trap/Escape, thay
+overlay tự dựng. `cn` của UI khai báo custom font-size groups để `text-label`,
+`text-body`, `text-heading-*` không bị hiểu nhầm là màu và xóa semantic text color.
+
+`/signup-business` và các màn Auth dùng `AuthenticationLayout` với header brand/vi-en,
+card hẹp căn giữa, nền semantic và Button/Input/FormField từ shared UI.
+Header được lấy từ `SiteHeader` dùng chung với Landing. Landing truyền navigation;
+Auth không truyền navigation nên chỉ hiện logo/ngôn ngữ, không nav/menu/CTA marketing.
+PasswordInput hỗ trợ hiện/ẩn mật khẩu bằng nút có aria-label. Không sao chép logo, trial claim,
+CAPTCHA hoặc nội dung điều khoản của website tham chiếu.
+
+Luồng account-first (ADR 0004): đăng ký email → xác minh → Business info → địa chỉ
+→ tạo doanh nghiệp. `BusinessOnboardingForm` dùng chung cho email/Google; không tạo
+hai wizard. Giờ hoạt động được cấu hình riêng sau onboarding, không tự tạo từ giá
+trị mặc định. Bản đồ Leaflet chỉ tải ở client tại bước địa chỉ, có attribution OSM,
+click/drag pin và định vị theo thao tác người dùng. Địa chỉ/tọa độ nhập tay vẫn dùng
+được khi bản đồ hoặc quyền định vị lỗi. Không có Nominatim autocomplete.
+
+Metadata có title/description/OG/Twitter/canonical/hreflang cho vi/en, signup
+noindex; public origin từ `NEXT_PUBLIC_WEB_URL`, Admin auth dùng base origin từ
+`NEXT_PUBLIC_ADMIN_WORKSPACE_URL`, còn private Admin routes canonicalize sang
+`{tenantSlug}.<admin-workspace-host>` sau khi Auth Profile đã được xác thực.
+Chưa khai báo OG image/social handle khi chưa có asset/tài khoản chính thức.
+
+### Token guard và ngoại lệ
+
+```bash
+pnpm --filter @repo/web validate:tokens
+pnpm lint:web
+```
+
+Web lint chạy guard dùng chung với UI: kiểm tra source/app, màu HEX/RGB/HSL,
+palette Tailwind (gồm gradient stops) và tên token Landing cũ.
+Ngoại lệ duy nhất có whitelist hẹp: `COLOR_INPUT_DEFAULT = "#006aff"` trong
+`views/home/constants/color-input.constants.ts`, vì native input[type=color]
+cần literal hex. Đây là initial primary-600 cho demo chọn màu Business, không
+phải palette UI mới. Màu do người dùng nhập là dữ liệu tùy biến, không phải brand
+token hệ thống. Opacity của CSS variable/custom hex dùng `withColorAlpha`, không
+ghép suffix hex vào chuỗi `var(...)`. SVG download resolve token thành màu trước
+khi xuất vì file độc lập không có stylesheet ứng dụng.
+
+Kiểm tra contrast tự động hiện bao phủ cặp canvas, body/muted, primary và status
+surface ở Light/Dark; kiểm tra trình duyệt cần chạy thêm để xác nhận responsive,
+focus, menu và trạng thái interactive thực tế.

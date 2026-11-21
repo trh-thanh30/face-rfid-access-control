@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AdminAccount {
+  id            String         @id @default(uuid()) @db.Uuid
+  email         String         @unique
+  password_hash String
+  full_name     String
+  role          admin_role     @default(ADMIN)
+  status        account_status @default(ACTIVE)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+
+  @@index([role, status])
+  @@map("admin_account")
+}
+
+model Person {
+  id         String        @id @default(uuid()) @db.Uuid
+  code       String        @unique
+  full_name  String
+  status     person_status @default(ACTIVE)
+  created_at DateTime      @default(now())
+  updated_at DateTime      @updatedAt
+
+  rfid_credentials RfidCredential[]
+  face_templates   FaceTemplate[]
+  access_grants    AccessGrant[]
+  auth_sessions    AuthSession[]
+  access_events    AccessEvent[]
+
+  @@index([status])
+  @@map("person")
+}
+
+model RfidCredential {
+  id           String            @id @default(uuid()) @db.Uuid
+  person_id    String            @db.Uuid
+  uid_hash     String            @unique
+  display_hint String?
+  status       credential_status @default(ACTIVE)
+  issued_at    DateTime          @default(now())
+  revoked_at   DateTime?
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+
+  person       Person        @relation(fields: [person_id], references: [id], onDelete: Restrict)
+  auth_sessions AuthSession[]
+
+  @@index([person_id, status])
+  @@map("rfid_credential")
+}
+
+model FaceTemplate {
+  id                   String    @id @default(uuid()) @db.Uuid
+  person_id            String    @db.Uuid
+  embedding            Unsupported("vector(512)")
+  model_version        String
+  pipeline_fingerprint String
+  quality_score        Float?
+  is_active            Boolean   @default(true)
+  created_at           DateTime  @default(now())
+
+  person Person @relation(fields: [person_id], references: [id], onDelete: Restrict)
+
+  @@index([person_id, is_active])
+  @@map("face_template")
+}
+
+model AccessPoint {
+  id         String   @id @default(uuid()) @db.Uuid
+  code       String   @unique
+  name       String
+  location   String?
+  timezone   String   @default("Asia/Ho_Chi_Minh")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  devices       Device[]
+  access_grants AccessGrant[]
+
+  @@map("access_point")
+}
+
+model Device {
+  id               String        @id @default(uuid()) @db.Uuid
+  access_point_id  String        @db.Uuid
+  device_code      String        @unique
+  token_hash       String
+  status           device_status @default(ACTIVE)
+  firmware_version String?
+  capabilities     Json?
+  last_seen_at     DateTime?
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+
+  access_point AccessPoint       @relation(fields: [access_point_id], references: [id], onDelete: Restrict)
+  auth_sessions AuthSession[]
+  commands      ActuationCommand[]
+  access_events AccessEvent[]
+
+  @@index([access_point_id, status])
+  @@index([last_seen_at])
+  @@map("device")
+}
+
+model AccessGrant {
+  id              String       @id @default(uuid()) @db.Uuid
+  person_id       String       @db.Uuid
+  access_point_id String       @db.Uuid
+  valid_from      DateTime     @db.Date
+  valid_until     DateTime     @db.Date
+  time_from       DateTime     @db.Time(0)
+  time_until      DateTime     @db.Time(0)
+  timezone        String       @default("Asia/Ho_Chi_Minh")
+  status          grant_status @default(ACTIVE)
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
+
+  person       Person      @relation(fields: [person_id], references: [id], onDelete: Restrict)
+  access_point AccessPoint @relation(fields: [access_point_id], references: [id], onDelete: Restrict)
+
+  @@index([person_id, access_point_id, status])
+  @@index([valid_from, valid_until])
+  @@map("access_grant")
+}
+
+model AuthSession {
+  id                  String              @id @default(uuid()) @db.Uuid
+  device_id           String              @db.Uuid
+  request_id          String
+  rfid_credential_id  String?             @db.Uuid
+  person_id           String?             @db.Uuid
+  status              auth_session_status @default(PENDING)
+  reason_code         String?
+  similarity          Float?
+  threshold           Float?
+  model_version       String?
+  created_at          DateTime            @default(now())
+  expires_at          DateTime
+  completed_at        DateTime?
+
+  device          Device          @relation(fields: [device_id], references: [id], onDelete: Restrict)
+  rfid_credential RfidCredential? @relation(fields: [rfid_credential_id], references: [id], onDelete: SetNull)
+  person          Person?         @relation(fields: [person_id], references: [id], onDelete: SetNull)
+  command         ActuationCommand?
+  access_events   AccessEvent[]
+
+  @@unique([device_id, request_id])
+  @@index([status, expires_at])
+  @@index([person_id, created_at])
+  @@map("auth_session")
+}
+
+model ActuationCommand {
+  id               String           @id @default(uuid()) @db.Uuid
+  session_id       String           @unique @db.Uuid
+  device_id        String           @db.Uuid
+  open_duration_ms Int
+  expires_at       DateTime
+  execution_status actuation_status @default(PENDING)
+  error_code       String?
+  acknowledged_at  DateTime?
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+
+  session AuthSession @relation(fields: [session_id], references: [id], onDelete: Restrict)
+  device  Device      @relation(fields: [device_id], references: [id], onDelete: Restrict)
+
+  @@index([device_id, expires_at])
+  @@map("actuation_command")
+}
+
+model AccessEvent {
+  id          String            @id @default(uuid()) @db.Uuid
+  session_id  String            @db.Uuid
+  device_id   String            @db.Uuid
+  person_id   String?           @db.Uuid
+  event_type  access_event_type
+  result      String
+  reason_code String?
+  similarity  Float?
+  latency_ms  Int?
+  metadata    Json?
+  occurred_at DateTime          @default(now())
+
+  session AuthSession @relation(fields: [session_id], references: [id], onDelete: Restrict)
+  device  Device      @relation(fields: [device_id], references: [id], onDelete: Restrict)
+  person  Person?     @relation(fields: [person_id], references: [id], onDelete: SetNull)
+
+  @@index([session_id, occurred_at])
+  @@index([device_id, occurred_at])
+  @@index([person_id, occurred_at])
+  @@map("access_event")
+}
+
+enum admin_role {
+  SUPER_ADMIN
+  ADMIN
+}
+
+enum account_status {
+  ACTIVE
+  DISABLED
+}
+
+enum person_status {
+  ACTIVE
+  DISABLED
+}
+
+enum credential_status {
+  ACTIVE
+  REVOKED
+}
+
+enum device_status {
+  ACTIVE
+  DISABLED
+}
+
+enum grant_status {
+  ACTIVE
+  REVOKED
+}
+
+enum auth_session_status {
+  PENDING
+  VERIFYING
+  ALLOWED
+  DENIED
+  EXPIRED
+}
+
+enum actuation_status {
+  PENDING
+  APPLIED_UNCONFIRMED
+  CONFIRMED
+  FAILED
+  UNKNOWN
+}
+
+enum access_event_type {
+  DECISION
+  ACTUATION
+  DEVICE
+}

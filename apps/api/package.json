@@ -1,0 +1,80 @@
+{
+  "name": "@access/api",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build && tsc-alias -p tsconfig.json",
+    "dev": "pnpm start:dev",
+    "start": "nest start",
+    "start:dev": "pnpm --filter @access/shared build && dotenv -e ../../.env.development -- nest start --watch",
+    "start:prod": "node dist/main.js",
+    "lint": "eslint \"{src,test}/**/*.ts\" --max-warnings 0",
+    "check-types": "pnpm --filter @access/shared build && tsc --noEmit",
+    "test": "pnpm --filter @access/shared build && cross-env NODE_ENV=test jest --runInBand",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "dotenv -e ../../.env.development -- prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "db:seed": "dotenv -e ../../.env.development -- ts-node prisma/seed.ts",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/platform-express": "^11.0.1",
+    "@prisma/adapter-pg": "^7.4.1",
+    "@prisma/client": "^7.4.1",
+    "@access/shared": "workspace:*",
+    "bcryptjs": "^3.0.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "pg": "^8.18.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@eslint/js": "^9.18.0",
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/testing": "^11.0.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.10.7",
+    "@types/pg": "^8.16.0",
+    "cross-env": "^10.0.0",
+    "dotenv-cli": "^10.0.0",
+    "eslint": "^9.39.1",
+    "jest": "^30.0.0",
+    "prisma": "^7.4.1",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.20.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "module": "CommonJS",
+            "moduleResolution": "node",
+            "rewriteRelativeImportExtensions": false,
+            "resolvePackageJsonExports": false
+          }
+        }
+      ]
+    },
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  }
+}

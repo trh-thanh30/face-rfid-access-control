@@ -1,0 +1,129 @@
+# Environment Variables
+
+Repo dùng nhiều file env theo môi trường. File mẫu là `.env.example`.
+
+## File Env
+
+| File               | Vai trò                                       |
+| :----------------- | :-------------------------------------------- |
+| `.env.example`     | Mẫu public, được commit.                      |
+| `.env.development` | Cấu hình local/dev, không commit secret thật. |
+| `.env.test`        | Cấu hình test.                                |
+| `.env.production`  | Cấu hình production/deploy, không commit.     |
+
+Frontend apps cũng có file mẫu riêng để copy khi cần override cục bộ theo app:
+
+| File                               | Vai trò                                        |
+| :--------------------------------- | :--------------------------------------------- |
+| `apps/web/.env.example`            | Mẫu env cho Landing + Business Admin.          |
+| `apps/platform-admin/.env.example` | Mẫu env riêng cho Platform/Super Admin Portal. |
+
+Với luồng dev thông thường, ưu tiên copy root `.env.example` thành `.env.development`. Chỉ tạo `apps/<app>/.env.local` khi app đó cần override riêng.
+
+## Nhóm Biến Chính
+
+### App Ports
+
+- `API_PORT`
+- `WEB_PORT`
+- `PLATFORM_ADMIN_PORT`
+
+Giá trị local mặc định:
+
+| App/Service    | Biến                  | URL mặc định                     |
+| :------------- | :-------------------- | :------------------------------- |
+| API            | `API_PORT`            | `http://localhost:3000`          |
+| Web            | `WEB_PORT`            | `http://localhost:3001`          |
+| Business Admin | `WEB_PORT`            | `http://localhost:3001/vi/admin` |
+| Platform Admin | `PLATFORM_ADMIN_PORT` | `http://localhost:3003`          |
+
+### Database
+
+- `DATABASE_URL`
+- `DIRECT_URL`
+- `DEV_DB_PORT`
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+
+### Redis
+
+- `REDIS_URL`
+- `REDIS_DEV_PORT`
+- `REDIS_DB_PORT`
+
+### Asset Storage
+
+- `STORAGE_DRIVER`: `local` hoặc `minio`.
+- `ASSET_CDN_URL`: base URL dùng để trả public asset URL. Khi dùng MinIO local, có thể đặt là `http://localhost:9000/booking-public`.
+- `MINIO_ENDPOINT`, `MINIO_PORT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`.
+- `MINIO_BUCKET_PUBLIC`, `MINIO_BUCKET_PRIVATE`, `MINIO_BUCKET_TEMP`.
+
+### Telegram CI
+
+Chỉ cần cấu hình trên GitHub Actions Secrets:
+
+- `CI_TELEGRAM_BOT_TOKEN`
+- `CI_TELEGRAM_CHAT_ID`
+
+Không cần đưa token thật vào file env local.
+
+### Docker Images
+
+Production compose dùng các biến image sau:
+
+- `API_IMAGE`
+- `WEB_IMAGE`
+- `PLATFORM_ADMIN_IMAGE`
+- `IMAGE_TAG`
+
+## Frontend Env
+
+ARCH-001: `WEB_URL` / `NEXT_PUBLIC_WEB_URL` là origin chung của Landing + Admin,
+không chứa `/admin`. API Google redirects thêm `/{locale}/admin/*` trong code.
+`ADMIN_WORKSPACE_URL` / `NEXT_PUBLIC_ADMIN_WORKSPACE_URL` là base origin riêng để
+tạo vanity URL `{tenantSlug}.{host}/{locale}/admin/*`; hostname này chỉ nhận diện
+workspace, còn Tenant/Business context vẫn lấy từ authenticated profile và IDs.
+`ADMIN_URL`, `NEXT_PUBLIC_ADMIN_URL`, `ADMIN_PORT`, `ADMIN_IMAGE` không còn được
+dùng cho Business Admin; có thể bỏ khỏi env deploy sau cutover. Không đổi Google
+API callback hay nới cookie Domain/SameSite. Docker/CI phải truyền public URLs
+ở build time. `*:admin` scripts là alias về Web, không tạo service riêng.
+
+Các app Next.js chỉ được expose biến ra browser nếu biến có prefix `NEXT_PUBLIC_`.
+
+Biến FE dùng chung:
+
+- `NEXT_PUBLIC_API_URL`: API base URL, ví dụ
+  `http://localhost:3000/api/v1`.
+- `NEXT_PUBLIC_ADMIN_WORKSPACE_URL`: Admin workspace base origin, ví dụ
+  `http://localhost:3001` hoặc `https://app.bookingbase.com`.
+
+Biến riêng theo app:
+
+| App                     | Biến public URL                   | Auth context |
+| :---------------------- | :-------------------------------- | :----------- |
+| `apps/web`              | `NEXT_PUBLIC_WEB_URL`             | `client`     |
+| `apps/web` (`/admin/*`) | `NEXT_PUBLIC_ADMIN_WORKSPACE_URL` | `admin`      |
+
+API dùng `ADMIN_WORKSPACE_URL` để cho phép base origin và đúng một Tenant label
+bên dưới base host trong CORS. Ví dụ `https://acme.app.bookingbase.com` được phép
+khi base là `https://app.bookingbase.com`; hostname lồng nhiều cấp hoặc lookalike
+không được phép. Khi base là `http://localhost:3001`, code không tạo hoặc cho
+phép Tenant subdomain. Production dùng `SameSite=Lax; Secure` khi Admin và API
+cùng site. Không cấu hình `CORS_ORIGINS=*` khi dùng credentials.
+
+Google OAuth development phải đăng ký chính xác callback
+`http://localhost:3000/api/v1/auth/admin/google/callback` trong Google Cloud
+Console. Luồng đầy đủ với Tenant subdomain phải được kiểm thử trên staging HTTPS.
+| `apps/platform-admin` | `NEXT_PUBLIC_PLATFORM_ADMIN_URL` | `platform` |
+
+`NEXT_PUBLIC_AUTH_CONTEXT` chỉ nên đặt trong app-local env file nếu cần debug/override. Trong code hiện tại auth context đang được set tường minh theo từng app để tránh trộn Business Admin với Platform Admin.
+
+## Rule
+
+- Biến public cho Next.js phải bắt đầu bằng `NEXT_PUBLIC_`.
+- Secret không dùng prefix `NEXT_PUBLIC_`.
+- Không đọc env trực tiếp rải rác trong UI component.
+- Gom env mapping vào config module khi số lượng biến tăng.
+- `.env.example` phải có comment đủ rõ nhưng không chứa secret thật.
+- Không commit `.env.local`, `.env.development`, `.env.production` hoặc secret thật.

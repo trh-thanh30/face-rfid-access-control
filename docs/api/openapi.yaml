@@ -1,0 +1,269 @@
+openapi: 3.1.0
+info:
+  title: Face RFID Access Control Contracts
+  version: 1.0.0
+  description: Target HTTP contract shared by API, device/simulator, and Vision.
+servers:
+  - url: http://localhost:3000
+    description: NestJS API (development)
+tags:
+  - name: Device
+  - name: Vision
+paths:
+  /api/device/v1/heartbeat:
+    post:
+      tags: [Device]
+      summary: Report device health and capabilities
+      security: [{ deviceToken: [] }]
+      parameters: [{ $ref: "#/components/parameters/ContractVersion" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DeviceHeartbeat" }
+      responses:
+        "204": { description: Heartbeat accepted }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "426": { $ref: "#/components/responses/UnsupportedContract" }
+  /api/device/v1/access-sessions:
+    post:
+      tags: [Device]
+      summary: Start an idempotent RFID access session
+      security: [{ deviceToken: [] }]
+      parameters: [{ $ref: "#/components/parameters/ContractVersion" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateAccessSession" }
+      responses:
+        "202":
+          description: Session created or replayed by device and request ID
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccessSessionResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "426": { $ref: "#/components/responses/UnsupportedContract" }
+  /api/device/v1/access-sessions/{sessionId}:
+    get:
+      tags: [Device]
+      summary: Poll the current access decision
+      security: [{ deviceToken: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/ContractVersion" }
+        - { $ref: "#/components/parameters/SessionId" }
+      responses:
+        "200":
+          description: Current session state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccessSessionResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: Session not found for this device }
+        "426": { $ref: "#/components/responses/UnsupportedContract" }
+  /api/device/v1/access-sessions/{sessionId}/ack:
+    post:
+      tags: [Device]
+      summary: Acknowledge physical command execution
+      security: [{ deviceToken: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/ContractVersion" }
+        - { $ref: "#/components/parameters/SessionId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AcknowledgeCommand" }
+      responses:
+        "204":
+          { description: Acknowledgement accepted or idempotently replayed }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409": { description: Command does not belong to the session/device }
+        "426": { $ref: "#/components/responses/UnsupportedContract" }
+  /internal/vision/v1/verify:
+    post:
+      tags: [Vision]
+      summary: Verify the captured face against supplied references (1:1)
+      security: [{ serviceToken: [] }]
+      parameters: [{ $ref: "#/components/parameters/ContractVersion" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VisionVerificationRequest" }
+      responses:
+        "200":
+          description: Verification evidence; NestJS remains the decision owner
+          content:
+            application/json:
+              schema:
+                { $ref: "#/components/schemas/VisionVerificationResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "426": { $ref: "#/components/responses/UnsupportedContract" }
+components:
+  securitySchemes:
+    deviceToken: { type: http, scheme: bearer, bearerFormat: device-token }
+    serviceToken: { type: http, scheme: bearer, bearerFormat: service-token }
+  parameters:
+    ContractVersion:
+      name: X-Access-Contract-Version
+      in: header
+      required: true
+      schema:
+        type: string
+        pattern: '^1\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?$'
+        example: 1.0.0
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    Unauthorized: { description: Missing or invalid bearer token }
+    UnsupportedContract:
+      { description: Missing, malformed, or unsupported contract major version }
+  schemas:
+    DeviceCapabilities:
+      type: object
+      additionalProperties: false
+      required: [rfid, actuator, doorSensor, indicators]
+      properties:
+        rfid: { type: boolean }
+        actuator: { type: string, enum: [SERVO, RELAY, VIRTUAL] }
+        doorSensor: { type: boolean }
+        indicators: { type: boolean }
+    DeviceHeartbeat:
+      type: object
+      additionalProperties: false
+      required:
+        [deviceCode, timestamp, firmwareVersion, uptimeSeconds, capabilities]
+      properties:
+        deviceCode: { type: string, minLength: 1, maxLength: 128 }
+        timestamp: { type: string, format: date-time }
+        firmwareVersion: { type: string, minLength: 1, maxLength: 64 }
+        uptimeSeconds: { type: integer, minimum: 0 }
+        rssi: { type: integer, minimum: -120, maximum: 0 }
+        resetReason: { type: string, maxLength: 128 }
+        capabilities: { $ref: "#/components/schemas/DeviceCapabilities" }
+    CreateAccessSession:
+      type: object
+      additionalProperties: false
+      required: [deviceCode, requestId, timestamp, rfidUid, firmwareVersion]
+      properties:
+        deviceCode: { type: string, minLength: 1, maxLength: 128 }
+        requestId: { type: string, minLength: 1, maxLength: 128 }
+        timestamp: { type: string, format: date-time }
+        rfidUid: { type: string, pattern: "^[0-9A-Fa-f]{4,64}$" }
+        firmwareVersion: { type: string, minLength: 1, maxLength: 64 }
+    AccessSessionResponse:
+      type: object
+      additionalProperties: false
+      required: [sessionId, status, expiresAt]
+      properties:
+        sessionId: { type: string, format: uuid }
+        status: { $ref: "#/components/schemas/AuthSessionStatus" }
+        expiresAt: { type: string, format: date-time }
+        allowed: { type: boolean }
+        reasonCode: { $ref: "#/components/schemas/AccessReasonCode" }
+        command: { $ref: "#/components/schemas/ActuationCommand" }
+    ActuationCommand:
+      type: object
+      additionalProperties: false
+      required: [commandId, sessionId, deviceId, expiresAt, openDurationMs]
+      properties:
+        commandId: { type: string, format: uuid }
+        sessionId: { type: string, format: uuid }
+        deviceId: { type: string, format: uuid }
+        expiresAt: { type: string, format: date-time }
+        openDurationMs: { type: integer, minimum: 100, maximum: 60000 }
+    AcknowledgeCommand:
+      type: object
+      additionalProperties: false
+      required: [commandId, executionStatus, timestamp]
+      properties:
+        commandId: { type: string, format: uuid }
+        executionStatus:
+          type: string
+          enum: [APPLIED_UNCONFIRMED, CONFIRMED, FAILED, UNKNOWN]
+        timestamp: { type: string, format: date-time }
+        errorCode: { type: string, minLength: 1, maxLength: 128 }
+    VisionReference:
+      type: object
+      additionalProperties: false
+      required: [templateId, embedding, modelVersion, pipelineFingerprint]
+      properties:
+        templateId: { type: string, format: uuid }
+        embedding:
+          type: array
+          minItems: 1
+          maxItems: 2048
+          items: { type: number }
+        modelVersion: { type: string, minLength: 1, maxLength: 128 }
+        pipelineFingerprint: { type: string, minLength: 1, maxLength: 256 }
+    VisionVerificationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          sessionId,
+          correlationId,
+          deadline,
+          minimumValidFrames,
+          threshold,
+          references,
+        ]
+      properties:
+        sessionId: { type: string, format: uuid }
+        correlationId: { type: string, minLength: 1, maxLength: 128 }
+        deadline: { type: string, format: date-time }
+        minimumValidFrames: { type: integer, minimum: 1, maximum: 30 }
+        threshold: { type: number, minimum: -1, maximum: 1 }
+        references:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items: { $ref: "#/components/schemas/VisionReference" }
+    VisionVerificationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          matched,
+          similarity,
+          validFrameCount,
+          modelVersion,
+          pipelineFingerprint,
+          latencyMs,
+          quality,
+        ]
+      properties:
+        matched: { type: boolean }
+        similarity: { type: [number, "null"], minimum: -1, maximum: 1 }
+        validFrameCount: { type: integer, minimum: 0 }
+        modelVersion: { type: string, minLength: 1, maxLength: 128 }
+        pipelineFingerprint: { type: string, minLength: 1, maxLength: 256 }
+        latencyMs: { type: integer, minimum: 0 }
+        reasonCode: { $ref: "#/components/schemas/AccessReasonCode" }
+        quality:
+          type: object
+          additionalProperties: { type: number }
+    AuthSessionStatus:
+      type: string
+      enum: [PENDING, VERIFYING, ALLOWED, DENIED, EXPIRED]
+    AccessReasonCode:
+      type: string
+      enum:
+        - UNKNOWN_CARD
+        - CARD_DISABLED
+        - PERSON_DISABLED
+        - NO_PERMISSION
+        - OUTSIDE_ALLOWED_TIME
+        - NO_FACE_PROFILE
+        - CAMERA_BUSY
+        - NO_FACE
+        - MULTIPLE_FACES
+        - LOW_QUALITY
+        - FACE_MISMATCH
+        - SESSION_EXPIRED
+        - DEVICE_ERROR
+        - INTERNAL_ERROR
