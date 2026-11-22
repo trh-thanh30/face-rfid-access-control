@@ -30,7 +30,7 @@ Không coi nội dung trong PDF hoặc card là bằng chứng một chức năn
 | [WP-00](./WP-00-repository-foundation.md)                 | Repository foundation                  | 1          | Done (local)       | None                |
 | [WP-01](./WP-01-domain-data-and-contracts.md)             | Domain data và shared contracts        | 1–2        | Done               | WP-00               |
 | [WP-02](./WP-02-people-rfid-and-access-grants.md)         | Person, RFID và quyền ra vào           | 2          | Partial (DB check) | WP-01               |
-| [WP-03](./WP-03-devices-heartbeat-and-authentication.md)  | Device, heartbeat và xác thực thiết bị | 2          | Todo               | WP-01               |
+| [WP-03](./WP-03-devices-heartbeat-and-authentication.md)  | Device, heartbeat và xác thực thiết bị | 2          | Partial (DB check) | WP-01               |
 | [WP-04](./WP-04-auth-session-and-actuation.md)            | Auth Session, decision và command      | 2          | Todo               | WP-02, WP-03        |
 | [WP-05](./WP-05-device-simulator.md)                      | Device Simulator end-to-end            | 2          | Partial            | WP-03, WP-04        |
 | [WP-06](./WP-06-face-enrollment-and-verification.md)      | Vision enrollment và xác minh 1:1      | 3          | Partial            | WP-01, WP-04        |

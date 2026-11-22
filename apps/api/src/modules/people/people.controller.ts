@@ -25,7 +25,7 @@ import {
   UpdatePersonUseCase,
 } from "./use-cases/people.use-cases";
 
-@Controller("people")
+@Controller("v1/people")
 export class PeopleController {
   constructor(
     private readonly createPerson: CreatePersonUseCase,

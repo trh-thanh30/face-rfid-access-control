@@ -36,7 +36,7 @@ export class RfidCredentialController {
     private readonly revokeCredential: RevokeRfidCredentialUseCase,
   ) {}
 
-  @Post("people/:personId/rfid-credentials")
+  @Post("v1/people/:personId/rfid-credentials")
   attach(
     @Param("personId", ParseUUIDPipe) personId: string,
     @Body(new SchemaValidationPipe(attachRfidCredentialSchema))
@@ -49,13 +49,13 @@ export class RfidCredentialController {
     );
   }
 
-  @Patch("rfid-credentials/:id/revoke")
+  @Patch("v1/rfid-credentials/:id/revoke")
   revoke(@Param("id", ParseUUIDPipe) id: string) {
     return this.revokeCredential.execute(id);
   }
 }
 
-@Controller("access-grants")
+@Controller("v1/access-grants")
 export class AccessGrantController {
   constructor(
     private readonly createGrant: CreateAccessGrantUseCase,

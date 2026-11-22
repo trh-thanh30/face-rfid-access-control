@@ -23,5 +23,22 @@ export function validateEnvironment(
     throw new Error("PORT must be a valid TCP port");
   }
 
-  return { ...values, PORT: port };
+  const offlineThreshold = Number(
+    values.DEVICE_OFFLINE_THRESHOLD_SECONDS ?? 30,
+  );
+  if (
+    !Number.isInteger(offlineThreshold) ||
+    offlineThreshold < 5 ||
+    offlineThreshold > 3600
+  ) {
+    throw new Error(
+      "DEVICE_OFFLINE_THRESHOLD_SECONDS must be an integer from 5 to 3600",
+    );
+  }
+
+  return {
+    ...values,
+    PORT: port,
+    DEVICE_OFFLINE_THRESHOLD_SECONDS: offlineThreshold,
+  };
 }

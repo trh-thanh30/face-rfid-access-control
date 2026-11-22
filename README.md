@@ -57,6 +57,8 @@ pnpm dev:vision
 DEVICE_TOKEN=development-device-token pnpm dev:simulator
 ```
 
+Device API dùng `X-Device-Code`, `X-Access-Contract-Version` và bearer token. Token đăng ký/rotation chỉ hiển thị một lần; không đưa token production vào source hoặc log.
+
 | Service       | URL                                         |
 | ------------- | ------------------------------------------- |
 | API           | `http://localhost:3000/api/v1`              |

@@ -15,7 +15,9 @@ paths:
       tags: [Device]
       summary: Report device health and capabilities
       security: [{ deviceToken: [] }]
-      parameters: [{ $ref: "#/components/parameters/ContractVersion" }]
+      parameters:
+        - { $ref: "#/components/parameters/ContractVersion" }
+        - { $ref: "#/components/parameters/DeviceCode" }
       requestBody:
         required: true
         content:
@@ -30,7 +32,9 @@ paths:
       tags: [Device]
       summary: Start an idempotent RFID access session
       security: [{ deviceToken: [] }]
-      parameters: [{ $ref: "#/components/parameters/ContractVersion" }]
+      parameters:
+        - { $ref: "#/components/parameters/ContractVersion" }
+        - { $ref: "#/components/parameters/DeviceCode" }
       requestBody:
         required: true
         content:
@@ -51,6 +55,7 @@ paths:
       security: [{ deviceToken: [] }]
       parameters:
         - { $ref: "#/components/parameters/ContractVersion" }
+        - { $ref: "#/components/parameters/DeviceCode" }
         - { $ref: "#/components/parameters/SessionId" }
       responses:
         "200":
@@ -68,6 +73,7 @@ paths:
       security: [{ deviceToken: [] }]
       parameters:
         - { $ref: "#/components/parameters/ContractVersion" }
+        - { $ref: "#/components/parameters/DeviceCode" }
         - { $ref: "#/components/parameters/SessionId" }
       requestBody:
         required: true
@@ -118,6 +124,12 @@ components:
       in: path
       required: true
       schema: { type: string, format: uuid }
+    DeviceCode:
+      name: X-Device-Code
+      in: header
+      required: true
+      description: Public device identifier paired with the opaque bearer token.
+      schema: { type: string, minLength: 1, maxLength: 64 }
   responses:
     Unauthorized: { description: Missing or invalid bearer token }
     UnsupportedContract:

@@ -9,6 +9,7 @@ import {
   ACTUATION_STATUSES,
   AUTH_SESSION_STATUSES,
   DEVICE_ENDPOINTS,
+  DEVICE_CODE_HEADER,
 } from "../dist/index.js";
 
 const outputUrl = new URL(
@@ -29,6 +30,7 @@ function renderHeader() {
 namespace access_contract {
 static constexpr char kVersion[] = "${ACCESS_CONTRACT_VERSION}";
 static constexpr char kVersionHeader[] = "${ACCESS_CONTRACT_VERSION_HEADER}";
+static constexpr char kDeviceCodeHeader[] = "${DEVICE_CODE_HEADER}";
 
 static constexpr char kHeartbeatPath[] = "${DEVICE_ENDPOINTS.heartbeat}";
 static constexpr char kAccessSessionsPath[] = "${DEVICE_ENDPOINTS.accessSessions}";

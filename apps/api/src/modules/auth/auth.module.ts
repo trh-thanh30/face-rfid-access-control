@@ -5,6 +5,7 @@ import { AuthController } from "./auth.controller";
 import { ADMIN_ACCOUNT_REPOSITORY } from "./repository/admin-account.repository.interface";
 import { PrismaAdminAccountRepository } from "./repository/prisma-admin-account.repository";
 import { LoginUseCase } from "./use-cases/login.use-case";
+import { AdminJwtGuard } from "./guards/admin-jwt.guard";
 
 @Module({
   imports: [
@@ -21,11 +22,13 @@ import { LoginUseCase } from "./use-cases/login.use-case";
   controllers: [AuthController],
   providers: [
     LoginUseCase,
+    AdminJwtGuard,
     PrismaAdminAccountRepository,
     {
       provide: ADMIN_ACCOUNT_REPOSITORY,
       useExisting: PrismaAdminAccountRepository,
     },
   ],
+  exports: [JwtModule, AdminJwtGuard],
 })
 export class AuthModule {}

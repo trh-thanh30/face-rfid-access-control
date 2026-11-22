@@ -114,6 +114,11 @@ model Device {
   firmware_version String?
   capabilities     Json?
   last_seen_at     DateTime?
+  device_reported_at DateTime?
+  uptime_seconds   Int?
+  rssi             Int?
+  reset_reason     String?
+  credential_rotated_at DateTime?
   created_at       DateTime      @default(now())
   updated_at       DateTime      @updatedAt
 

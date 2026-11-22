@@ -4,6 +4,7 @@
 namespace access_contract {
 static constexpr char kVersion[] = "1.0.0";
 static constexpr char kVersionHeader[] = "X-Access-Contract-Version";
+static constexpr char kDeviceCodeHeader[] = "X-Device-Code";
 
 static constexpr char kHeartbeatPath[] = "/api/device/v1/heartbeat";
 static constexpr char kAccessSessionsPath[] = "/api/device/v1/access-sessions";

@@ -10,6 +10,8 @@ import {
   AUTH_SESSION_STATUSES,
   createAccessGrantSchema,
   createPersonSchema,
+  createAccessPointSchema,
+  registerDeviceSchema,
   createAccessSessionSchema,
   deviceHeartbeatSchema,
   isContractVersionCompatible,
@@ -52,6 +54,25 @@ test("validates strict Admin person and grant inputs", () => {
       timeFrom: "08:00",
       timeUntil: "17:00",
       timezone: "Asia/Ho_Chi_Minh",
+    }).success,
+    false,
+  );
+});
+
+test("validates Access Point and Device registration inputs", () => {
+  assert.equal(
+    createAccessPointSchema.safeParse({
+      code: "DOOR_02",
+      name: "Door 02",
+      timezone: "Invalid/Timezone",
+    }).success,
+    false,
+  );
+  assert.equal(
+    registerDeviceSchema.safeParse({
+      accessPointId: "34c87d34-cb0d-41fb-a4be-d08c19df183e",
+      deviceCode: "ESP32_DOOR_02",
+      token: "client-must-not-supply-a-token",
     }).success,
     false,
   );

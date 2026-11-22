@@ -2,7 +2,7 @@ import { Body, Controller, Post } from "@nestjs/common";
 import { LoginDto } from "./dto/login.dto";
 import { LoginUseCase } from "./use-cases/login.use-case";
 
-@Controller("auth")
+@Controller("v1/auth")
 export class AuthController {
   constructor(private readonly loginUseCase: LoginUseCase) {}
 

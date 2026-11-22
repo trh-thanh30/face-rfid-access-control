@@ -15,7 +15,7 @@ export function loadConfig(
   }
 
   return {
-    apiUrl: environment.API_URL ?? "http://localhost:3000/api/v1",
+    apiUrl: (environment.API_URL ?? "http://localhost:3000").replace(/\/$/, ""),
     deviceCode: environment.DEVICE_CODE ?? "ESP32_DOOR_01",
     deviceToken: environment.DEVICE_TOKEN!,
     firmwareVersion: "simulator-0.1.0",

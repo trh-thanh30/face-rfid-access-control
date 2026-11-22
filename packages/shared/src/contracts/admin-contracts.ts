@@ -3,6 +3,7 @@ import { z } from "zod";
 export const PERSON_STATUSES = ["ACTIVE", "DISABLED"] as const;
 export const CREDENTIAL_STATUSES = ["ACTIVE", "REVOKED"] as const;
 export const GRANT_STATUSES = ["ACTIVE", "REVOKED"] as const;
+export const DEVICE_STATUSES = ["ACTIVE", "DISABLED"] as const;
 
 const codeSchema = z
   .string()
@@ -106,6 +107,31 @@ export const listAccessGrantsQuerySchema = z
   })
   .strict();
 
+export const createAccessPointSchema = z
+  .object({
+    code: codeSchema,
+    name: z.string().trim().min(1).max(160),
+    location: z.string().trim().max(255).optional(),
+    timezone: timezoneSchema,
+  })
+  .strict();
+
+export const registerDeviceSchema = z
+  .object({
+    accessPointId: z.uuid(),
+    deviceCode: codeSchema,
+  })
+  .strict();
+
+export const listDevicesQuerySchema = z
+  .object({
+    accessPointId: z.uuid().optional(),
+    status: z.enum(DEVICE_STATUSES).optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  })
+  .strict();
+
 export function normalizeTime(value: string): string {
   return value.length === 5 ? `${value}:00` : value;
 }
@@ -119,3 +145,6 @@ export type AttachRfidCredentialInput = z.infer<
 export type CreateAccessGrantInput = z.infer<typeof createAccessGrantSchema>;
 export type UpdateAccessGrantInput = z.infer<typeof updateAccessGrantSchema>;
 export type ListAccessGrantsQuery = z.infer<typeof listAccessGrantsQuerySchema>;
+export type CreateAccessPointInput = z.infer<typeof createAccessPointSchema>;
+export type RegisterDeviceInput = z.infer<typeof registerDeviceSchema>;
+export type ListDevicesQuery = z.infer<typeof listDevicesQuerySchema>;

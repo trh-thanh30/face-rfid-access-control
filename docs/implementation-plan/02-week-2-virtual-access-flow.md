@@ -39,14 +39,14 @@ Simulator đọc UID
 
 - [x] `W2-01` Person create/update/disable/list/get; Owner: Backend.
 - [x] `W2-02` Gắn, thay và vô hiệu hóa RFID Credential; Owner: Backend.
-- [ ] `W2-03` Access Point và Device registration; Owner: Backend.
+- [x] `W2-03` Access Point và Device registration; Owner: Backend.
 - [x] `W2-04` Access Grant theo ngày, giờ và timezone; Owner: Backend.
 - [x] `W2-05` Unit test repository-independent cho các use case; Owner: Backend.
 
 ### Ngày 2 — Device authentication và sessions
 
-- [ ] `W2-06` Device credential/token validation; Owner: Backend.
-- [ ] `W2-07` Heartbeat cập nhật last-seen và diagnostics; Owner: Backend.
+- [x] `W2-06` Device credential/token validation; Owner: Backend.
+- [x] `W2-07` Heartbeat cập nhật last-seen và diagnostics; Owner: Backend.
 - [ ] `W2-08` Create session với unique `(deviceId, requestId)`; Owner: Backend.
 - [ ] `W2-09` Poll chỉ cho Device sở hữu session; Owner: Backend.
 - [ ] `W2-10` Test retry đồng thời không tạo hai session; Owner: Backend.
