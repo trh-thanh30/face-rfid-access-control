@@ -2,7 +2,7 @@
 
 | Thuộc tính | Giá trị                                |
 | ---------- | -------------------------------------- |
-| Trạng thái | Todo                                   |
+| Trạng thái | Partial — chờ DB runtime verification  |
 | Tuần       | 2                                      |
 | Ưu tiên    | Critical                               |
 | Bề mặt     | API, database, shared contracts, Admin |
@@ -42,12 +42,12 @@ Không bao gồm face enrollment, session orchestration hoặc mở cửa thủ 
 
 | ID       | Task                                          | Trạng thái |
 | -------- | --------------------------------------------- | ---------- |
-| WP02-001 | Person repository/use cases/controllers/tests | Todo       |
-| WP02-002 | RFID canonicalization, hashing và lifecycle   | Todo       |
-| WP02-003 | Access Grant repository/use cases             | Todo       |
-| WP02-004 | Timezone và overnight policy tests            | Todo       |
-| WP02-005 | Shared Admin DTO/schemas                      | Todo       |
-| WP02-006 | Seed Person/grant test fixtures               | Todo       |
+| WP02-001 | Person repository/use cases/controllers/tests | Done       |
+| WP02-002 | RFID canonicalization, hashing và lifecycle   | Done       |
+| WP02-003 | Access Grant repository/use cases             | Done       |
+| WP02-004 | Timezone và overnight policy tests            | Done       |
+| WP02-005 | Shared Admin DTO/schemas                      | Done       |
+| WP02-006 | Seed Person/grant test fixtures               | Done       |
 
 ## Acceptance
 
@@ -55,3 +55,26 @@ Không bao gồm face enrollment, session orchestration hoặc mở cửa thủ 
 - Duplicate active UID bị database/application từ chối.
 - Disabled Person/card và invalid grant có reason code rõ.
 - Boundary tests cho ngày đầu/cuối, timezone và qua nửa đêm pass.
+
+## Verification evidence
+
+- Person và Access Grant endpoints đi qua controller → use case → repository → Prisma.
+- UID được canonicalize rồi HMAC-SHA256 bằng `RFID_HASH_KEY`; response/audit chỉ dùng display hint.
+- Migration `0002_wp02_master_data` dùng partial unique index để mỗi UID chỉ có một credential `ACTIVE`, đồng thời cho phép cấp lại UID đã revoke.
+- Credential và grant mutations ghi `admin_audit_event` trong cùng database transaction.
+- `CheckAccessEligibilityUseCase` trả reason code ổn định cho unknown/revoked card, disabled Person, không có grant và ngoài giờ.
+- Unit/contract tests cover timezone `Asia/Ho_Chi_Minh`, ngày đầu/cuối và ca qua nửa đêm gắn với ngày bắt đầu.
+- `prisma validate`, format, lint, typecheck, test và production build đã pass ngày 2026-11-22.
+
+## Remaining verification
+
+Docker daemon không chạy tại thời điểm triển khai, nên chưa thể apply migration, chạy seed hai lần và smoke-test endpoint trên PostgreSQL thật. Sau khi Docker hoạt động, chạy:
+
+```bash
+pnpm infra:dev:up
+pnpm prisma:migrate:dev
+pnpm db:seed:dev
+pnpm db:seed:dev
+```
+
+Chỉ chuyển card sang `Done` sau khi bốn lệnh trên pass và duplicate active UID bị PostgreSQL từ chối.

@@ -9,7 +9,7 @@ export type AppEnvironment = {
 export function validateEnvironment(
   values: Record<string, unknown>,
 ): Record<string, unknown> {
-  const required = ["DATABASE_URL", "JWT_SECRET"] as const;
+  const required = ["DATABASE_URL", "JWT_SECRET", "RFID_HASH_KEY"] as const;
   const missing = required.filter((key) => !values[key]);
 
   if (missing.length > 0) {

@@ -38,6 +38,14 @@ Tài khoản development seed:
 - Email: `admin@example.com`
 - Password: `ChangeMe123!`
 
+Fixtures access-control:
+
+- Access Point: `DOOR_01`
+- Person hợp lệ: `P-DEMO`, RFID UID `04A1B2C3`
+- Person bị khóa: `P-DISABLED`, RFID UID `04DEAD01`
+
+UID chỉ dùng để mô phỏng local. Database lưu HMAC keyed và display hint, không lưu UID thô.
+
 Đây chỉ là credential local; phải đổi hoặc loại bỏ khi triển khai ngoài môi trường development.
 
 ## Chạy dịch vụ

@@ -25,21 +25,21 @@ Không coi nội dung trong PDF hoặc card là bằng chứng một chức năn
 
 ## Danh sách card
 
-| Card                                                      | Work package                           | Tuần       | Trạng thái       | Phụ thuộc           |
-| --------------------------------------------------------- | -------------------------------------- | ---------- | ---------------- | ------------------- |
-| [WP-00](./WP-00-repository-foundation.md)                 | Repository foundation                  | 1          | Done (local)     | None                |
-| [WP-01](./WP-01-domain-data-and-contracts.md)             | Domain data và shared contracts        | 1–2        | Done             | WP-00               |
-| [WP-02](./WP-02-people-rfid-and-access-grants.md)         | Person, RFID và quyền ra vào           | 2          | Todo             | WP-01               |
-| [WP-03](./WP-03-devices-heartbeat-and-authentication.md)  | Device, heartbeat và xác thực thiết bị | 2          | Todo             | WP-01               |
-| [WP-04](./WP-04-auth-session-and-actuation.md)            | Auth Session, decision và command      | 2          | Todo             | WP-02, WP-03        |
-| [WP-05](./WP-05-device-simulator.md)                      | Device Simulator end-to-end            | 2          | Partial          | WP-03, WP-04        |
-| [WP-06](./WP-06-face-enrollment-and-verification.md)      | Vision enrollment và xác minh 1:1      | 3          | Partial          | WP-01, WP-04        |
-| [WP-07](./WP-07-admin-operations.md)                      | Admin vận hành                         | 4          | Partial          | WP-02, WP-03, WP-06 |
-| [WP-08](./WP-08-esp32-firmware-and-hardware.md)           | ESP32 firmware và phần cứng            | 5          | Partial scaffold | WP-03, WP-04, WP-05 |
-| [WP-09](./WP-09-integration-reliability-and-fail-safe.md) | Tích hợp, idempotency và fail-safe     | 5          | Todo             | WP-04, WP-06, WP-08 |
-| [WP-10](./WP-10-security-and-biometric-privacy.md)        | Security và dữ liệu sinh trắc học      | Xuyên suốt | Partial          | WP-01..WP-09        |
-| [WP-11](./WP-11-evaluation-and-reporting.md)              | FAR/FRR, latency và báo cáo            | 6          | Todo             | WP-06, WP-09        |
-| [WP-12](./WP-12-demo-operations-and-handover.md)          | Demo, vận hành và bàn giao             | 6          | Todo             | WP-00..WP-11        |
+| Card                                                      | Work package                           | Tuần       | Trạng thái         | Phụ thuộc           |
+| --------------------------------------------------------- | -------------------------------------- | ---------- | ------------------ | ------------------- |
+| [WP-00](./WP-00-repository-foundation.md)                 | Repository foundation                  | 1          | Done (local)       | None                |
+| [WP-01](./WP-01-domain-data-and-contracts.md)             | Domain data và shared contracts        | 1–2        | Done               | WP-00               |
+| [WP-02](./WP-02-people-rfid-and-access-grants.md)         | Person, RFID và quyền ra vào           | 2          | Partial (DB check) | WP-01               |
+| [WP-03](./WP-03-devices-heartbeat-and-authentication.md)  | Device, heartbeat và xác thực thiết bị | 2          | Todo               | WP-01               |
+| [WP-04](./WP-04-auth-session-and-actuation.md)            | Auth Session, decision và command      | 2          | Todo               | WP-02, WP-03        |
+| [WP-05](./WP-05-device-simulator.md)                      | Device Simulator end-to-end            | 2          | Partial            | WP-03, WP-04        |
+| [WP-06](./WP-06-face-enrollment-and-verification.md)      | Vision enrollment và xác minh 1:1      | 3          | Partial            | WP-01, WP-04        |
+| [WP-07](./WP-07-admin-operations.md)                      | Admin vận hành                         | 4          | Partial            | WP-02, WP-03, WP-06 |
+| [WP-08](./WP-08-esp32-firmware-and-hardware.md)           | ESP32 firmware và phần cứng            | 5          | Partial scaffold   | WP-03, WP-04, WP-05 |
+| [WP-09](./WP-09-integration-reliability-and-fail-safe.md) | Tích hợp, idempotency và fail-safe     | 5          | Todo               | WP-04, WP-06, WP-08 |
+| [WP-10](./WP-10-security-and-biometric-privacy.md)        | Security và dữ liệu sinh trắc học      | Xuyên suốt | Partial            | WP-01..WP-09        |
+| [WP-11](./WP-11-evaluation-and-reporting.md)              | FAR/FRR, latency và báo cáo            | 6          | Todo               | WP-06, WP-09        |
+| [WP-12](./WP-12-demo-operations-and-handover.md)          | Demo, vận hành và bàn giao             | 6          | Todo               | WP-00..WP-11        |
 
 ## Dependency graph
 

@@ -8,6 +8,8 @@ import {
   ACCESS_REASON_CODES,
   ACTUATION_STATUSES,
   AUTH_SESSION_STATUSES,
+  createAccessGrantSchema,
+  createPersonSchema,
   createAccessSessionSchema,
   deviceHeartbeatSchema,
   isContractVersionCompatible,
@@ -30,6 +32,29 @@ test("accepts a valid device heartbeat", () => {
   });
 
   assert.equal(result.success, true);
+});
+
+test("validates strict Admin person and grant inputs", () => {
+  assert.equal(
+    createPersonSchema.safeParse({
+      code: "P001",
+      fullName: "Demo Person",
+      status: "client-must-not-select-status",
+    }).success,
+    false,
+  );
+  assert.equal(
+    createAccessGrantSchema.safeParse({
+      personId: "04cf12c2-4446-4c00-bebe-e0e9859de4bd",
+      accessPointId: "34c87d34-cb0d-41fb-a4be-d08c19df183e",
+      validFrom: "2026-11-23",
+      validUntil: "2026-11-22",
+      timeFrom: "08:00",
+      timeUntil: "17:00",
+      timezone: "Asia/Ho_Chi_Minh",
+    }).success,
+    false,
+  );
 });
 
 test("rejects a device-selected person even when the remaining payload is valid", () => {

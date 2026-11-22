@@ -37,11 +37,11 @@ Simulator đọc UID
 
 ### Ngày 1 — Master data use cases
 
-- [ ] `W2-01` Person create/update/disable/list/get; Owner: Backend.
-- [ ] `W2-02` Gắn, thay và vô hiệu hóa RFID Credential; Owner: Backend.
+- [x] `W2-01` Person create/update/disable/list/get; Owner: Backend.
+- [x] `W2-02` Gắn, thay và vô hiệu hóa RFID Credential; Owner: Backend.
 - [ ] `W2-03` Access Point và Device registration; Owner: Backend.
-- [ ] `W2-04` Access Grant theo ngày, giờ và timezone; Owner: Backend.
-- [ ] `W2-05` Unit test repository-independent cho các use case; Owner: Backend.
+- [x] `W2-04` Access Grant theo ngày, giờ và timezone; Owner: Backend.
+- [x] `W2-05` Unit test repository-independent cho các use case; Owner: Backend.
 
 ### Ngày 2 — Device authentication và sessions
 
@@ -103,18 +103,18 @@ Reason code thuộc shared contract; UI text và firmware signal được ánh x
 
 ## 8. Kiểm thử bắt buộc
 
-| Case | Kỳ vọng |
-| --- | --- |
-| Thẻ + mặt + quyền hợp lệ | Một decision ALLOWED, một command, một ACK |
-| UID lạ | Từ chối trước Vision, Person null trong log |
-| Person bị khóa | Từ chối trước Vision |
-| Ngoài giờ | Từ chối với timezone đúng |
-| Face mismatch | DENIED, có evidence metadata |
-| Retry cùng request ID | Cùng session ID |
-| Poll nhiều lần | Cùng command ID |
-| ACK nhiều lần | Một logical actuation result |
-| Command hết hạn | Không mở cửa ảo, ACK lỗi/expired theo contract |
-| API mất kết nối | Simulator fail-safe, không tự cho phép |
+| Case                     | Kỳ vọng                                        |
+| ------------------------ | ---------------------------------------------- |
+| Thẻ + mặt + quyền hợp lệ | Một decision ALLOWED, một command, một ACK     |
+| UID lạ                   | Từ chối trước Vision, Person null trong log    |
+| Person bị khóa           | Từ chối trước Vision                           |
+| Ngoài giờ                | Từ chối với timezone đúng                      |
+| Face mismatch            | DENIED, có evidence metadata                   |
+| Retry cùng request ID    | Cùng session ID                                |
+| Poll nhiều lần           | Cùng command ID                                |
+| ACK nhiều lần            | Một logical actuation result                   |
+| Command hết hạn          | Không mở cửa ảo, ACK lỗi/expired theo contract |
+| API mất kết nối          | Simulator fail-safe, không tự cho phép         |
 
 ## 9. Definition of Done
 
