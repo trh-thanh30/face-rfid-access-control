@@ -12,9 +12,10 @@ export const DEVICE_ENDPOINTS = {
   acknowledgeCommand: `${DEVICE_API_BASE_PATH}/access-sessions/{sessionId}/ack`,
 } as const;
 
-export const VISION_API_BASE_PATH = "/internal/vision/v1";
+export const VISION_API_BASE_PATH = "/internal/v1";
 export const VISION_ENDPOINTS = {
-  verify: `${VISION_API_BASE_PATH}/verify`,
+  enrollments: `${VISION_API_BASE_PATH}/enrollments`,
+  verifications: `${VISION_API_BASE_PATH}/verifications`,
 } as const;
 
 const SEMVER_PATTERN =

@@ -9,7 +9,13 @@ export type AppEnvironment = {
 export function validateEnvironment(
   values: Record<string, unknown>,
 ): Record<string, unknown> {
-  const required = ["DATABASE_URL", "JWT_SECRET", "RFID_HASH_KEY"] as const;
+  const required = [
+    "DATABASE_URL",
+    "JWT_SECRET",
+    "RFID_HASH_KEY",
+    "VISION_URL",
+    "VISION_SERVICE_TOKEN",
+  ] as const;
   const missing = required.filter((key) => !values[key]);
 
   if (missing.length > 0) {
@@ -40,6 +46,9 @@ export function validateEnvironment(
     ["AUTH_SESSION_TTL_SECONDS", 3, 120],
     ["ACTUATION_COMMAND_TTL_SECONDS", 1, 60],
     ["ACTUATION_OPEN_DURATION_MS", 100, 60_000],
+    ["VISION_MINIMUM_VALID_FRAMES", 1, 30],
+    ["VISION_REQUEST_TIMEOUT_MS", 100, 120_000],
+    ["VISION_ENROLLMENT_TIMEOUT_SECONDS", 5, 300],
   ] as const;
   for (const [key, minimum, maximum] of boundedIntegers) {
     const parsed = Number(values[key]);
@@ -58,6 +67,12 @@ export function validateEnvironment(
     );
   }
   values.FAKE_FACE_MODE = fakeFaceMode;
+
+  const threshold = Number(values.VISION_VERIFICATION_THRESHOLD);
+  if (!Number.isFinite(threshold) || threshold < -1 || threshold > 1) {
+    throw new Error("VISION_VERIFICATION_THRESHOLD must be from -1 to 1");
+  }
+  values.VISION_VERIFICATION_THRESHOLD = threshold;
 
   return {
     ...values,

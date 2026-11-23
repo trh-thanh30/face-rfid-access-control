@@ -2,7 +2,7 @@
 
 | Thuộc tính | Giá trị                                                      |
 | ---------- | ------------------------------------------------------------ |
-| Trạng thái | Partial scaffold                                             |
+| Trạng thái | Implemented; chờ kiểm chứng webcam/model và E2E runtime      |
 | Tuần       | 3                                                            |
 | Ưu tiên    | Critical                                                     |
 | Bề mặt     | FastAPI Vision, camera, model, Face Template, NestJS adapter |
@@ -46,13 +46,22 @@ POST /internal/v1/verifications
 | ID       | Task                                      | Trạng thái |
 | -------- | ----------------------------------------- | ---------- |
 | WP06-001 | FastAPI health/settings/tests             | Done       |
-| WP06-002 | CameraProvider adapters                   | Todo       |
-| WP06-003 | Model loader/checksum/fingerprint         | Todo       |
-| WP06-004 | Quality evaluator                         | Todo       |
-| WP06-005 | Enrollment session/persistence            | Todo       |
-| WP06-006 | 1:1 verification algorithm                | Todo       |
-| WP06-007 | NestJS Vision adapter/contract tests      | Todo       |
-| WP06-008 | Fixture/golden tests và latency breakdown | Todo       |
+| WP06-002 | CameraProvider adapters                   | Done       |
+| WP06-003 | Model loader/checksum/fingerprint         | Done       |
+| WP06-004 | Quality evaluator                         | Done       |
+| WP06-005 | Enrollment session/persistence            | Done       |
+| WP06-006 | 1:1 verification algorithm                | Done       |
+| WP06-007 | NestJS Vision adapter/contract tests      | Done       |
+| WP06-008 | Fixture/golden tests và latency breakdown | Done       |
+
+## Implementation evidence
+
+- `apps/vision/app/domain` giữ port, quality policy và vector math độc lập phần cứng.
+- `FixtureCameraProvider`, `UploadedFrameProvider` và `OpenCVCameraProvider` thay qua config; InsightFace được nạp lazy và kiểm checksum.
+- Enrollment loại frame zero/multi-face, quality thấp và mẫu gần trùng; NestJS thay atomically các template active sau khi Vision thành công.
+- Verification chỉ nhận references của Person do RFID/session chọn, lấy max theo reference trên từng frame rồi median qua các frame.
+- Internal API dùng service bearer; ảnh gốc không được lưu và embedding không được log/UI.
+- Fixture unit tests và NestJS adapter tests đã pass. Kiểm chứng webcam/model thật và E2E database còn phụ thuộc phần cứng + Docker runtime.
 
 ## Acceptance
 

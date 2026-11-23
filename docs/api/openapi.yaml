@@ -91,12 +91,29 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "409": { description: Command does not belong to the session/device }
         "426": { $ref: "#/components/responses/UnsupportedContract" }
-  /internal/vision/v1/verify:
+  /internal/v1/enrollments:
+    post:
+      tags: [Vision]
+      summary: Capture quality-gated enrollment templates
+      security: [{ serviceToken: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VisionEnrollmentRequest" }
+      responses:
+        "200":
+          description: Templates to persist atomically for the selected Person
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VisionEnrollmentResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { description: Capture or quality requirements were not met }
+  /internal/v1/verifications:
     post:
       tags: [Vision]
       summary: Verify the captured face against supplied references (1:1)
       security: [{ serviceToken: [] }]
-      parameters: [{ $ref: "#/components/parameters/ContractVersion" }]
       requestBody:
         required: true
         content:
@@ -110,7 +127,6 @@ paths:
               schema:
                 { $ref: "#/components/schemas/VisionVerificationResponse" }
         "401": { $ref: "#/components/responses/Unauthorized" }
-        "426": { $ref: "#/components/responses/UnsupportedContract" }
 components:
   securitySchemes:
     deviceToken: { type: http, scheme: bearer, bearerFormat: device-token }
@@ -218,6 +234,53 @@ components:
           items: { type: number }
         modelVersion: { type: string, minLength: 1, maxLength: 128 }
         pipelineFingerprint: { type: string, minLength: 1, maxLength: 256 }
+    VisionEnrollmentRequest:
+      type: object
+      additionalProperties: false
+      required: [sessionId, correlationId, deadline, sampleCount]
+      properties:
+        sessionId: { type: string, format: uuid }
+        correlationId: { type: string, minLength: 1, maxLength: 128 }
+        deadline: { type: string, format: date-time }
+        sampleCount: { type: integer, minimum: 5, maximum: 10 }
+    VisionEnrollmentTemplate:
+      type: object
+      additionalProperties: false
+      required: [embedding, qualityScore, modelVersion, pipelineFingerprint]
+      properties:
+        embedding:
+          type: array
+          minItems: 1
+          maxItems: 2048
+          items: { type: number }
+        qualityScore: { type: number, minimum: 0, maximum: 1 }
+        modelVersion: { type: string, minLength: 1, maxLength: 128 }
+        pipelineFingerprint: { type: string, minLength: 1, maxLength: 256 }
+    VisionEnrollmentResponse:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          templates,
+          rejectedFrameCount,
+          modelVersion,
+          pipelineFingerprint,
+          quality,
+          latencyMs,
+        ]
+      properties:
+        templates:
+          type: array
+          minItems: 5
+          maxItems: 10
+          items: { $ref: "#/components/schemas/VisionEnrollmentTemplate" }
+        rejectedFrameCount: { type: integer, minimum: 0 }
+        modelVersion: { type: string, minLength: 1, maxLength: 128 }
+        pipelineFingerprint: { type: string, minLength: 1, maxLength: 256 }
+        quality:
+          type: object
+          additionalProperties: { type: number }
+        latencyMs: { type: integer, minimum: 0 }
     VisionVerificationRequest:
       type: object
       additionalProperties: false

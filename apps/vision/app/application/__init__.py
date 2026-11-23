@@ -1,0 +1,1 @@
+"""Vision application use cases."""

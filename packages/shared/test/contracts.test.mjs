@@ -14,6 +14,7 @@ import {
   registerDeviceSchema,
   createAccessSessionSchema,
   deviceHeartbeatSchema,
+  visionEnrollmentResponseSchema,
   isContractVersionCompatible,
   visionVerificationRequestSchema,
 } from "../dist/index.js";
@@ -114,6 +115,31 @@ test("requires at least one face reference", () => {
   });
 
   assert.equal(result.success, false);
+});
+
+test("requires five to ten enrollment templates with model metadata", () => {
+  const template = {
+    embedding: [1, 0],
+    qualityScore: 0.9,
+    modelVersion: "model-v1",
+    pipelineFingerprint: "pipeline-v1",
+  };
+  const result = visionEnrollmentResponseSchema.safeParse({
+    templates: Array.from({ length: 5 }, () => template),
+    rejectedFrameCount: 1,
+    modelVersion: "model-v1",
+    pipelineFingerprint: "pipeline-v1",
+    quality: { meanScore: 0.9 },
+    latencyMs: 20,
+  });
+  assert.equal(result.success, true);
+  assert.equal(
+    visionEnrollmentResponseSchema.safeParse({
+      ...result.data,
+      templates: [template],
+    }).success,
+    false,
+  );
 });
 
 test("accepts only contract versions from the supported major", () => {
