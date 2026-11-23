@@ -17,4 +17,11 @@ export interface FaceTemplateRepository {
     personId: string,
     templates: NewFaceTemplate[],
   ): Promise<number>;
+  summary(personId: string): Promise<{
+    activeTemplateCount: number;
+    modelVersion: string | null;
+    pipelineFingerprint: string | null;
+    meanQualityScore: number | null;
+    lastEnrolledAt: Date | null;
+  }>;
 }

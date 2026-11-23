@@ -61,6 +61,29 @@ export class PrismaFaceTemplateRepository implements FaceTemplateRepository {
     });
     return templates.length;
   }
+
+  async summary(personId: string) {
+    const [aggregate, latest] = await Promise.all([
+      this.prisma.faceTemplate.aggregate({
+        where: { person_id: personId, is_active: true },
+        _count: { id: true },
+        _avg: { quality_score: true },
+        _max: { created_at: true },
+      }),
+      this.prisma.faceTemplate.findFirst({
+        where: { person_id: personId, is_active: true },
+        orderBy: [{ created_at: "desc" }, { id: "desc" }],
+        select: { model_version: true, pipeline_fingerprint: true },
+      }),
+    ]);
+    return {
+      activeTemplateCount: aggregate._count.id,
+      modelVersion: latest?.model_version ?? null,
+      pipelineFingerprint: latest?.pipeline_fingerprint ?? null,
+      meanQualityScore: aggregate._avg.quality_score,
+      lastEnrolledAt: aggregate._max.created_at,
+    };
+  }
 }
 
 function parseVector(value: string): number[] {

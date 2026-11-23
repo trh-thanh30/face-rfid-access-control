@@ -95,6 +95,14 @@ export class PrismaRfidCredentialRepository implements RfidCredentialRepository 
       ? { ...mapCredential(credential), personStatus: credential.person.status }
       : null;
   }
+
+  async listForPerson(personId: string): Promise<CredentialRecord[]> {
+    const credentials = await this.prisma.rfidCredential.findMany({
+      where: { person_id: personId },
+      orderBy: [{ issued_at: "desc" }, { id: "desc" }],
+    });
+    return credentials.map(mapCredential);
+  }
 }
 
 @Injectable()

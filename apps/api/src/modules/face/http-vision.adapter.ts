@@ -19,6 +19,7 @@ import type {
   FaceEnrollmentInput,
   FaceEnrollmentPort,
 } from "./face-enrollment.port";
+import { FaceEnrollmentRejectedError } from "./face-enrollment.port";
 import {
   FACE_TEMPLATE_REPOSITORY,
   type FaceTemplateRepository,
@@ -108,7 +109,15 @@ export class HttpVisionAdapter implements FaceVerifierPort, FaceEnrollmentPort {
       deadline: input.deadline.toISOString(),
       sampleCount: input.sampleCount,
     };
-    const response = await this.post(VISION_ENDPOINTS.enrollments, payload);
+    let response: unknown;
+    try {
+      response = await this.post(VISION_ENDPOINTS.enrollments, payload);
+    } catch (error) {
+      if (error instanceof VisionRejectedError) {
+        throw new FaceEnrollmentRejectedError(error.reasonCode);
+      }
+      throw error;
+    }
     const parsed = visionEnrollmentResponseSchema.safeParse(response);
     if (!parsed.success) {
       throw new FaceVerifierInfrastructureError("Malformed Vision response");

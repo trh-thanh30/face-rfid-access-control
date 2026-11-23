@@ -8,6 +8,7 @@ import { AccessManagementModule } from "./modules/access-management/access-manag
 import { PeopleModule } from "./modules/people/people.module";
 import { DevicesModule } from "./modules/devices/devices.module";
 import { SessionsModule } from "./modules/sessions/sessions.module";
+import { AdminOperationsModule } from "./modules/admin-operations/admin-operations.module";
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SessionsModule } from "./modules/sessions/sessions.module";
     AccessManagementModule,
     DevicesModule,
     SessionsModule,
+    AdminOperationsModule,
   ],
 })
 export class AppModule {}

@@ -43,6 +43,7 @@ describe("HttpVisionAdapter", () => {
         },
       ]),
       replaceActive: jest.fn(),
+      summary: jest.fn(),
     };
     const fetchMock = jest.spyOn(global, "fetch").mockResolvedValue(
       new Response(
@@ -82,6 +83,7 @@ describe("HttpVisionAdapter", () => {
     const templates: FaceTemplateRepository = {
       findActiveByPersonId: jest.fn().mockResolvedValue([]),
       replaceActive: jest.fn(),
+      summary: jest.fn(),
     };
     const fetchMock = jest.spyOn(global, "fetch");
     const adapter = new HttpVisionAdapter(configuration, templates);
@@ -109,6 +111,7 @@ describe("HttpVisionAdapter", () => {
         },
       ]),
       replaceActive: jest.fn(),
+      summary: jest.fn(),
     };
     jest.spyOn(global, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ reasonCode: "CAMERA_BUSY" }), {

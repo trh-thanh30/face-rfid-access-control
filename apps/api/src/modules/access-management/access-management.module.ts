@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { AuthModule } from "../auth/auth.module";
 import { PeopleModule } from "../people/people.module";
 import {
   AccessGrantController,
@@ -25,7 +26,7 @@ import {
 } from "./use-cases/access-management.use-cases";
 
 @Module({
-  imports: [PeopleModule],
+  imports: [PeopleModule, AuthModule],
   controllers: [RfidCredentialController, AccessGrantController],
   providers: [
     RfidIdentityService,

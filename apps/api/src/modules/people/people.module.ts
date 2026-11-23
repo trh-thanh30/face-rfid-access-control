@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { AuthModule } from "../auth/auth.module";
 import { PeopleController } from "./people.controller";
 import { PERSON_REPOSITORY } from "./repository/person.repository.interface";
 import { PrismaPersonRepository } from "./repository/prisma-person.repository";
@@ -11,6 +12,7 @@ import {
 } from "./use-cases/people.use-cases";
 
 @Module({
+  imports: [AuthModule],
   controllers: [PeopleController],
   providers: [
     PrismaPersonRepository,

@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 import {
   createPersonSchema,
@@ -17,6 +18,7 @@ import {
   type UpdatePersonInput,
 } from "@access/shared";
 import { SchemaValidationPipe } from "../../common/pipes/schema-validation.pipe";
+import { AdminJwtGuard } from "../auth/guards/admin-jwt.guard";
 import {
   CreatePersonUseCase,
   DisablePersonUseCase,
@@ -26,6 +28,7 @@ import {
 } from "./use-cases/people.use-cases";
 
 @Controller("v1/people")
+@UseGuards(AdminJwtGuard)
 export class PeopleController {
   constructor(
     private readonly createPerson: CreatePersonUseCase,

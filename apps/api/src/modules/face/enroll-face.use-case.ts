@@ -4,6 +4,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from "@nestjs/common";
 import type { FaceEnrollmentRequest } from "@access/shared";
 import {
@@ -12,6 +13,7 @@ import {
 } from "../people/repository/person.repository.interface";
 import { FaceVerifierInfrastructureError } from "../sessions/face-verifier/face-verifier.port";
 import {
+  FaceEnrollmentRejectedError,
   FACE_ENROLLMENT_PORT,
   type FaceEnrollmentPort,
 } from "./face-enrollment.port";
@@ -67,6 +69,9 @@ export class EnrollFaceUseCase {
         quality: result.quality,
       };
     } catch (error) {
+      if (error instanceof FaceEnrollmentRejectedError) {
+        throw new UnprocessableEntityException(error.reasonCode);
+      }
       if (error instanceof FaceVerifierInfrastructureError) {
         throw new BadGatewayException("VISION_SERVICE_UNAVAILABLE");
       }

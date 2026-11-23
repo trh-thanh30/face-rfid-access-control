@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 import {
   attachRfidCredentialSchema,
@@ -19,6 +20,7 @@ import {
   type UpdateAccessGrantInput,
 } from "@access/shared";
 import { SchemaValidationPipe } from "../../common/pipes/schema-validation.pipe";
+import { AdminJwtGuard } from "../auth/guards/admin-jwt.guard";
 import {
   AttachRfidCredentialUseCase,
   CreateAccessGrantUseCase,
@@ -30,6 +32,7 @@ import {
 } from "./use-cases/access-management.use-cases";
 
 @Controller()
+@UseGuards(AdminJwtGuard)
 export class RfidCredentialController {
   constructor(
     private readonly attachCredential: AttachRfidCredentialUseCase,
@@ -53,9 +56,15 @@ export class RfidCredentialController {
   revoke(@Param("id", ParseUUIDPipe) id: string) {
     return this.revokeCredential.execute(id);
   }
+
+  @Get("v1/people/:personId/rfid-credentials")
+  list(@Param("personId", ParseUUIDPipe) personId: string) {
+    return this.attachCredential.list(personId);
+  }
 }
 
 @Controller("v1/access-grants")
+@UseGuards(AdminJwtGuard)
 export class AccessGrantController {
   constructor(
     private readonly createGrant: CreateAccessGrantUseCase,

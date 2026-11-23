@@ -48,6 +48,7 @@ export interface RfidCredentialRepository {
   }): Promise<CredentialRecord>;
   revoke(id: string): Promise<CredentialRecord | null>;
   findLatestByUidHash(uidHash: string): Promise<CredentialRecord | null>;
+  listForPerson(personId: string): Promise<CredentialRecord[]>;
 }
 
 export interface AccessGrantRepository {

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { login } from "@/src/lib/api-client";
+import { login, TOKEN_KEY } from "@/src/lib/api-client";
 
 export function LoginView() {
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
@@ -18,7 +18,7 @@ export function LoginView() {
         String(form.get("email")),
         String(form.get("password")),
       );
-      sessionStorage.setItem("access-control-token", result.accessToken ?? "");
+      sessionStorage.setItem(TOKEN_KEY, result.accessToken);
       setStatus("success");
       window.location.assign("/dashboard");
     } catch (caught) {
@@ -38,19 +38,13 @@ export function LoginView() {
             <input
               name="email"
               type="email"
-              defaultValue="admin@example.com"
+              placeholder="admin@example.com"
               required
             />
           </label>
           <label className="field">
             Mật khẩu
-            <input
-              name="password"
-              type="password"
-              defaultValue="ChangeMe123!"
-              minLength={8}
-              required
-            />
+            <input name="password" type="password" minLength={8} required />
           </label>
           {error ? (
             <p className="error" role="alert">

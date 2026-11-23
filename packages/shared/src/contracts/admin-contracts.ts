@@ -132,6 +132,23 @@ export const listDevicesQuerySchema = z
   })
   .strict();
 
+export const listAccessEventsQuerySchema = z
+  .object({
+    from: z.iso.datetime({ offset: true }).optional(),
+    to: z.iso.datetime({ offset: true }).optional(),
+    personId: z.uuid().optional(),
+    deviceId: z.uuid().optional(),
+    result: z.string().trim().min(1).max(64).optional(),
+    reasonCode: z.string().trim().min(1).max(64).optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  })
+  .strict()
+  .refine((value) => !value.from || !value.to || value.from <= value.to, {
+    message: "from must be before to",
+    path: ["to"],
+  });
+
 export function normalizeTime(value: string): string {
   return value.length === 5 ? `${value}:00` : value;
 }
@@ -148,3 +165,4 @@ export type ListAccessGrantsQuery = z.infer<typeof listAccessGrantsQuerySchema>;
 export type CreateAccessPointInput = z.infer<typeof createAccessPointSchema>;
 export type RegisterDeviceInput = z.infer<typeof registerDeviceSchema>;
 export type ListDevicesQuery = z.infer<typeof listDevicesQuerySchema>;
+export type ListAccessEventsQuery = z.infer<typeof listAccessEventsQuerySchema>;

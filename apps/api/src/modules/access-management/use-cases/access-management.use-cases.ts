@@ -64,6 +64,12 @@ export class AttachRfidCredentialUseCase {
       throw error;
     }
   }
+
+  async list(personId: string) {
+    const person = await this.people.findById(personId);
+    if (!person) throw new NotFoundException("PERSON_NOT_FOUND");
+    return this.credentials.listForPerson(personId);
+  }
 }
 
 @Injectable()
