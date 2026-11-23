@@ -19,6 +19,7 @@ telegram-notification.preview.*
 # Local source archives must stay outside the active project.
 _legacy/
 booking-system-base/
+.simulator-state/
 
 # TypeScript source-only package: prevent single-file tsc output from being staged.
 packages/shared/src/**/*.js

@@ -61,11 +61,11 @@ Simulator đọc UID
 
 ### Ngày 4 — Device Simulator
 
-- [ ] `W2-16` CLI chọn Device và UID fixture; Owner: Firmware/Frontend.
-- [ ] `W2-17` Heartbeat loop không chặn access flow; Owner: Firmware/Frontend.
-- [ ] `W2-18` Poll với timeout/backoff có giới hạn; Owner: Firmware/Frontend.
-- [ ] `W2-19` Persist command ID trước khi mô phỏng actuator; Owner: Firmware/Frontend.
-- [ ] `W2-20` ACK retry không tạo actuation event trùng; Owner: Backend + Firmware.
+- [x] `W2-16` CLI chọn Device và UID fixture; Owner: Firmware/Frontend.
+- [x] `W2-17` Heartbeat loop không chặn access flow; Owner: Firmware/Frontend.
+- [x] `W2-18` Poll với timeout/backoff có giới hạn; Owner: Firmware/Frontend.
+- [x] `W2-19` Persist command ID trước khi mô phỏng actuator; Owner: Firmware/Frontend.
+- [x] `W2-20` ACK retry không tạo actuation event trùng; Owner: Backend + Firmware.
 
 ### Ngày 5 — Integration và demo
 

@@ -77,3 +77,4 @@ export type DeviceHeartbeat = z.infer<typeof deviceHeartbeatSchema>;
 export type CreateAccessSession = z.infer<typeof createAccessSessionSchema>;
 export type AccessSessionResponse = z.infer<typeof accessSessionResponseSchema>;
 export type AcknowledgeCommand = z.infer<typeof acknowledgeCommandSchema>;
+export type ActuationCommand = z.infer<typeof actuationCommandSchema>;

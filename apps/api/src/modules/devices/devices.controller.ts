@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from "@nestjs/common";
 import {
@@ -16,6 +17,7 @@ import {
   deviceHeartbeatSchema,
   listDevicesQuerySchema,
   registerDeviceSchema,
+  DEVICE_ID_HEADER,
   type CreateAccessPointInput,
   type DeviceHeartbeat,
   type ListDevicesQuery,
@@ -48,10 +50,13 @@ export class DeviceApiController {
   @HttpCode(204)
   async heartbeat(
     @Req() request: DeviceRequest,
+    @Res({ passthrough: true })
+    response: { setHeader(name: string, value: string): void },
     @Body(new SchemaValidationPipe(deviceHeartbeatSchema))
     input: DeviceHeartbeat,
   ) {
     await this.recordHeartbeat.execute(request.device!, input);
+    response.setHeader(DEVICE_ID_HEADER, request.device!.id);
   }
 }
 

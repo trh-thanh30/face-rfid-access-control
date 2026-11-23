@@ -57,6 +57,14 @@ pnpm dev:vision
 DEVICE_TOKEN=development-device-token pnpm dev:simulator
 ```
 
+Chạy scenario không cần nhập tương tác:
+
+```bash
+pnpm --filter @access/device-simulator build
+DEVICE_TOKEN=development-device-token \
+pnpm --filter @access/device-simulator start -- --scenario duplicate
+```
+
 Device API dùng `X-Device-Code`, `X-Access-Contract-Version` và bearer token. Token đăng ký/rotation chỉ hiển thị một lần; không đưa token production vào source hoặc log.
 
 | Service       | URL                                         |

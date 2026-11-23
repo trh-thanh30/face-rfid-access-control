@@ -24,7 +24,12 @@ paths:
           application/json:
             schema: { $ref: "#/components/schemas/DeviceHeartbeat" }
       responses:
-        "204": { description: Heartbeat accepted }
+        "204":
+          description: Heartbeat accepted
+          headers:
+            X-Device-Id:
+              description: Authenticated Device UUID used to validate commands locally.
+              schema: { type: string, format: uuid }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "426": { $ref: "#/components/responses/UnsupportedContract" }
   /api/device/v1/access-sessions:

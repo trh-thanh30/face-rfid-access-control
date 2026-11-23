@@ -2,7 +2,7 @@
 
 | Thuộc tính | Giá trị                                              |
 | ---------- | ---------------------------------------------------- |
-| Trạng thái | Partial scaffold                                     |
+| Trạng thái | Partial — chờ API/DB end-to-end verification         |
 | Tuần       | 2                                                    |
 | Ưu tiên    | High                                                 |
 | Bề mặt     | `apps/device-simulator`, Device contracts, demo/test |
@@ -38,12 +38,12 @@ Simulator là chương trình Node.js chạy trên máy phát triển, có `pack
 | ID       | Task                              | Trạng thái |
 | -------- | --------------------------------- | ---------- |
 | WP05-001 | Package/config scaffold           | Done       |
-| WP05-002 | Heartbeat client loop             | Todo       |
-| WP05-003 | RFID fixture/interactive input    | Todo       |
-| WP05-004 | Session create/poll state machine | Todo       |
-| WP05-005 | Persistent command store          | Todo       |
-| WP05-006 | Virtual actuator và ACK retry     | Todo       |
-| WP05-007 | End-to-end scenario runner        | Todo       |
+| WP05-002 | Heartbeat client loop             | Done       |
+| WP05-003 | RFID fixture/interactive input    | Done       |
+| WP05-004 | Session create/poll state machine | Done       |
+| WP05-005 | Persistent command store          | Done       |
+| WP05-006 | Virtual actuator và ACK retry     | Done       |
+| WP05-007 | End-to-end scenario runner        | Done       |
 
 ## Acceptance
 
@@ -51,3 +51,19 @@ Simulator là chương trình Node.js chạy trên máy phát triển, có `pack
 - Simulator và API dùng schemas từ `@access/shared`.
 - Retry/replay tests chứng minh không mở cửa ảo hai lần.
 - Mất API giữ virtual door đóng và trả signal lỗi rõ.
+
+## Verification evidence
+
+- Config parse/bounds cho heartbeat, polling, ACK retry, state file và fixture UID; token bắt buộc từ environment.
+- Heartbeat loop chạy độc lập với access attempt. Heartbeat trả `X-Device-Id` đã xác thực để simulator kiểm tra command target.
+- CLI hỗ trợ fixture, custom UID, request ID và interactive mode; log chỉ chứa UID hint.
+- Polling có exponential backoff, local/server deadline và không actuate khi timeout/network error.
+- Persistent JSON store được ghi atomic trước actuator. Duplicate/replay command không mở cửa lần hai.
+- Restart ở trạng thái `RESERVED/ACTUATING` chuyển thành ACK `UNKNOWN`, không thử mở lại cửa.
+- Virtual actuator dùng `APPLIED_UNCONFIRMED`; ACK retry có giới hạn và ACK pending được flush ở lần khởi động sau.
+- Tests cover duplicate, wrong Device, expired command, network error, polling timeout/backoff, crash recovery và ACK retry.
+- Scenario `network-error` đã chạy thật ngày 2026-11-23: heartbeat/access đều báo lỗi và virtual door không mở.
+
+## Remaining verification
+
+Docker daemon chưa chạy nên chưa thể chạy scenario `allowed/denied/disabled-person/duplicate` với API và PostgreSQL thật từ clean seed. Vì vậy acceptance “software-only demo từ clean database” chưa có evidence và card chưa thể chuyển `Done`.

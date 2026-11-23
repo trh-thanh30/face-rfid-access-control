@@ -2,6 +2,7 @@ export const ACCESS_CONTRACT_NAME = "face-rfid-access-control";
 export const ACCESS_CONTRACT_VERSION = "1.0.0";
 export const ACCESS_CONTRACT_VERSION_HEADER = "X-Access-Contract-Version";
 export const DEVICE_CODE_HEADER = "X-Device-Code";
+export const DEVICE_ID_HEADER = "X-Device-Id";
 
 export const DEVICE_API_BASE_PATH = "/api/device/v1";
 export const DEVICE_ENDPOINTS = {
