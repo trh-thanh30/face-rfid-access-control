@@ -2,7 +2,7 @@
 
 | Thuộc tính | Giá trị                                                   |
 | ---------- | --------------------------------------------------------- |
-| Trạng thái | Todo                                                      |
+| Trạng thái | Partial — chờ DB concurrency/runtime verification         |
 | Tuần       | 2                                                         |
 | Ưu tiên    | Critical                                                  |
 | Bề mặt     | API orchestration, database, Vision port, Device contract |
@@ -42,13 +42,13 @@ POST /api/device/v1/access-sessions/:sessionId/ack
 
 | ID       | Task                                    | Trạng thái |
 | -------- | --------------------------------------- | ---------- |
-| WP04-001 | Session repository và transition policy | Todo       |
-| WP04-002 | Create-session use case với pre-check   | Todo       |
-| WP04-003 | FakeFaceVerifier adapter                | Todo       |
-| WP04-004 | Decision/event transaction              | Todo       |
-| WP04-005 | Stable command và poll ownership        | Todo       |
-| WP04-006 | Idempotent ACK và Actuation Event       | Todo       |
-| WP04-007 | Concurrent retry integration tests      | Todo       |
+| WP04-001 | Session repository và transition policy | Done       |
+| WP04-002 | Create-session use case với pre-check   | Done       |
+| WP04-003 | FakeFaceVerifier adapter                | Done       |
+| WP04-004 | Decision/event transaction              | Done       |
+| WP04-005 | Stable command và poll ownership        | Done       |
+| WP04-006 | Idempotent ACK và Actuation Event       | Done       |
+| WP04-007 | Concurrent retry integration tests      | Partial    |
 
 ## Acceptance
 
@@ -57,3 +57,23 @@ POST /api/device/v1/access-sessions/:sessionId/ack
 - Poll lặp không sinh command mới.
 - ACK lặp không sinh logical actuation mới.
 - Correlation ID truy được toàn luồng.
+
+## Verification evidence
+
+- `POST/GET/ACK /api/device/v1/access-sessions` dùng contract-version guard, Device authentication và ownership guard.
+- Session creation dựa trên unique `(device_id, request_id)`; atomic claim `PENDING → VERIFYING` đảm bảo một logical verifier invocation.
+- RFID/Person/Grant được pre-check trước Vision và re-check trước khi tạo command.
+- Fake Face Verifier hỗ trợ `allow`, `mismatch`, `camera_busy`, `timeout`; infrastructure failure không bị ghi thành biometric mismatch.
+- Decision và command được ghi trong một transaction. Command có một row duy nhất theo `session_id` và poll chỉ trả command còn hạn/chưa ACK.
+- ACK dùng atomic claim trên `acknowledged_at`; retry giống nhau là no-op, retry khác kết quả bị conflict.
+- Decision/Actuation Event có `deduplication_key` riêng và cùng `correlation_id` với Auth Session.
+- Không có door sensor thì `CONFIRMED` bị từ chối; phải dùng `APPLIED_UNCONFIRMED`.
+- Transition, pre-check denial, concurrent retry, stable command, Fake Vision và ACK tests pass trong 43 API tests ngày 2026-11-23.
+
+## Remaining verification
+
+Docker daemon chưa chạy nên chưa thể apply migration `0004_wp04_session_orchestration` hoặc chạy concurrency test trên PostgreSQL thật. `WP04-007` chỉ có in-memory concurrency test và chưa đủ để chứng minh unique constraint/transaction dưới database contention.
+
+Các giá trị `AUTH_SESSION_TTL_SECONDS`, `ACTUATION_COMMAND_TTL_SECONDS` và `ACTUATION_OPEN_DURATION_MS` hiện là cấu hình demo, chưa phải quyết định calibration D-012.
+
+Sau khi Docker hoạt động, chạy migration/seed rồi gửi đồng thời hai request cùng `requestId`; chỉ chuyển card sang `Done` khi database có đúng một Auth Session, một Decision Event, tối đa một command và một Actuation Event sau ACK retry.

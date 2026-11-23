@@ -147,6 +147,7 @@ model AccessGrant {
 
   person       Person      @relation(fields: [person_id], references: [id], onDelete: Restrict)
   access_point AccessPoint @relation(fields: [access_point_id], references: [id], onDelete: Restrict)
+  auth_sessions AuthSession[]
 
   @@index([person_id, access_point_id, status])
   @@index([valid_from, valid_until])
@@ -157,13 +158,17 @@ model AuthSession {
   id                  String              @id @default(uuid()) @db.Uuid
   device_id           String              @db.Uuid
   request_id          String
+  correlation_id      String              @unique
   rfid_credential_id  String?             @db.Uuid
   person_id           String?             @db.Uuid
+  access_grant_id     String?             @db.Uuid
   status              auth_session_status @default(PENDING)
   reason_code         String?
   similarity          Float?
   threshold           Float?
   model_version       String?
+  device_reported_at  DateTime?
+  firmware_version    String?
   created_at          DateTime            @default(now())
   expires_at          DateTime
   completed_at        DateTime?
@@ -171,12 +176,14 @@ model AuthSession {
   device          Device          @relation(fields: [device_id], references: [id], onDelete: Restrict)
   rfid_credential RfidCredential? @relation(fields: [rfid_credential_id], references: [id], onDelete: SetNull)
   person          Person?         @relation(fields: [person_id], references: [id], onDelete: SetNull)
+  access_grant    AccessGrant?    @relation(fields: [access_grant_id], references: [id], onDelete: SetNull)
   command         ActuationCommand?
   access_events   AccessEvent[]
 
   @@unique([device_id, request_id])
   @@index([status, expires_at])
   @@index([person_id, created_at])
+  @@index([correlation_id])
   @@map("auth_session")
 }
 
@@ -189,6 +196,7 @@ model ActuationCommand {
   execution_status actuation_status @default(PENDING)
   error_code       String?
   acknowledged_at  DateTime?
+  device_acknowledged_at DateTime?
   created_at       DateTime         @default(now())
   updated_at       DateTime         @updatedAt
 
@@ -205,6 +213,8 @@ model AccessEvent {
   device_id   String            @db.Uuid
   person_id   String?           @db.Uuid
   event_type  access_event_type
+  correlation_id String
+  deduplication_key String @unique
   result      String
   reason_code String?
   similarity  Float?
@@ -219,6 +229,7 @@ model AccessEvent {
   @@index([session_id, occurred_at])
   @@index([device_id, occurred_at])
   @@index([person_id, occurred_at])
+  @@index([correlation_id, occurred_at])
   @@map("access_event")
 }
 

@@ -47,17 +47,17 @@ Simulator đọc UID
 
 - [x] `W2-06` Device credential/token validation; Owner: Backend.
 - [x] `W2-07` Heartbeat cập nhật last-seen và diagnostics; Owner: Backend.
-- [ ] `W2-08` Create session với unique `(deviceId, requestId)`; Owner: Backend.
-- [ ] `W2-09` Poll chỉ cho Device sở hữu session; Owner: Backend.
+- [x] `W2-08` Create session với unique `(deviceId, requestId)`; Owner: Backend.
+- [x] `W2-09` Poll chỉ cho Device sở hữu session; Owner: Backend.
 - [ ] `W2-10` Test retry đồng thời không tạo hai session; Owner: Backend.
 
 ### Ngày 3 — Access orchestration
 
-- [ ] `W2-11` Pre-check thẻ, Person và Access Grant trước Vision; Owner: Backend.
-- [ ] `W2-12` Implement `FakeFaceVerifierAdapter`; Owner: AI.
-- [ ] `W2-13` Chuyển trạng thái hợp lệ và bảo vệ terminal states; Owner: Backend.
-- [ ] `W2-14` Tạo command trong transaction phù hợp sau khi kiểm tra quyền lần cuối; Owner: Backend.
-- [ ] `W2-15` Ghi reason code và correlation ID xuyên suốt; Owner: Backend.
+- [x] `W2-11` Pre-check thẻ, Person và Access Grant trước Vision; Owner: Backend.
+- [x] `W2-12` Implement `FakeFaceVerifierAdapter`; Owner: AI.
+- [x] `W2-13` Chuyển trạng thái hợp lệ và bảo vệ terminal states; Owner: Backend.
+- [x] `W2-14` Tạo command trong transaction phù hợp sau khi kiểm tra quyền lần cuối; Owner: Backend.
+- [x] `W2-15` Ghi reason code và correlation ID xuyên suốt; Owner: Backend.
 
 ### Ngày 4 — Device Simulator
 

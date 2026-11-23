@@ -50,6 +50,11 @@ import {
     CreateAccessPointUseCase,
     ListAccessPointsUseCase,
   ],
-  exports: [DeviceAuthGuard, DeviceSessionOwnershipGuard, DEVICE_REPOSITORY],
+  exports: [
+    ContractVersionGuard,
+    DeviceAuthGuard,
+    DeviceSessionOwnershipGuard,
+    DEVICE_REPOSITORY,
+  ],
 })
 export class DevicesModule {}

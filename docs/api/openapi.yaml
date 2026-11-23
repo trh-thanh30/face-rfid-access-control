@@ -173,6 +173,7 @@ components:
       required: [sessionId, status, expiresAt]
       properties:
         sessionId: { type: string, format: uuid }
+        correlationId: { type: string, format: uuid }
         status: { $ref: "#/components/schemas/AuthSessionStatus" }
         expiresAt: { type: string, format: date-time }
         allowed: { type: boolean }

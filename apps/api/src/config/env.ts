@@ -36,6 +36,29 @@ export function validateEnvironment(
     );
   }
 
+  const boundedIntegers = [
+    ["AUTH_SESSION_TTL_SECONDS", 3, 120],
+    ["ACTUATION_COMMAND_TTL_SECONDS", 1, 60],
+    ["ACTUATION_OPEN_DURATION_MS", 100, 60_000],
+  ] as const;
+  for (const [key, minimum, maximum] of boundedIntegers) {
+    const parsed = Number(values[key]);
+    if (!Number.isInteger(parsed) || parsed < minimum || parsed > maximum) {
+      throw new Error(
+        `${key} must be an integer from ${minimum} to ${maximum}`,
+      );
+    }
+    values[key] = parsed;
+  }
+
+  const fakeFaceMode = String(values.FAKE_FACE_MODE ?? "allow");
+  if (!["allow", "mismatch", "camera_busy", "timeout"].includes(fakeFaceMode)) {
+    throw new Error(
+      "FAKE_FACE_MODE must be allow, mismatch, camera_busy, or timeout",
+    );
+  }
+  values.FAKE_FACE_MODE = fakeFaceMode;
+
   return {
     ...values,
     PORT: port,

@@ -55,6 +55,7 @@ export const actuationCommandSchema = z
 export const accessSessionResponseSchema = z
   .object({
     sessionId: z.uuid(),
+    correlationId: z.uuid().optional(),
     status: authSessionStatusSchema,
     expiresAt: isoTimestampSchema,
     allowed: z.boolean().optional(),
