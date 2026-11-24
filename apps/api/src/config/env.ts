@@ -29,6 +29,19 @@ export function validateEnvironment(
     );
   }
 
+  if (String(values.NODE_ENV) === "production") {
+    const forbiddenDevelopmentSecrets = [
+      ["JWT_SECRET", "replace-with-at-least-32-random-characters"],
+      ["RFID_HASH_KEY", "replace-with-an-independent-random-secret"],
+      ["VISION_SERVICE_TOKEN", "development-vision-token"],
+    ] as const;
+    for (const [key, forbidden] of forbiddenDevelopmentSecrets) {
+      if (values[key] === forbidden) {
+        throw new Error(`${key} must be rotated for production`);
+      }
+    }
+  }
+
   const port = Number(values.PORT ?? values.API_PORT ?? 3000);
   if (!Number.isInteger(port) || port <= 0 || port > 65_535) {
     throw new Error("PORT must be a valid TCP port");
@@ -118,6 +131,21 @@ export function validateEnvironment(
     if (actual !== expected) {
       throw new Error(`${key} must be ${expected} for ${reliabilityProfile}`);
     }
+  }
+
+  const securityIntegers = [
+    ["SECURITY_ATTEMPT_WINDOW_SECONDS", 60, 10, 3600],
+    ["ADMIN_LOGIN_MAX_FAILURES", 5, 2, 100],
+    ["DEVICE_AUTH_MAX_FAILURES", 10, 2, 1000],
+  ] as const;
+  for (const [key, fallback, minimum, maximum] of securityIntegers) {
+    const value = Number(values[key] ?? fallback);
+    if (!Number.isInteger(value) || value < minimum || value > maximum) {
+      throw new Error(
+        `${key} must be an integer from ${minimum} to ${maximum}`,
+      );
+    }
+    values[key] = value;
   }
 
   return {

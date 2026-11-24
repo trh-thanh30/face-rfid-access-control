@@ -5,8 +5,11 @@ import type {
   DeviceRepository,
 } from "../repository/device.repository.interface";
 import { DeviceAuthenticationService } from "../use-cases/device.use-cases";
+import { SecurityAttemptLimiter } from "../../../common/security/security-attempt-limiter";
+import { ConfigService } from "@nestjs/config";
 
 describe("DeviceAuthenticationService", () => {
+  const limiter = () => new SecurityAttemptLimiter(new ConfigService());
   async function credential(
     overrides: Partial<DeviceCredentialRecord> = {},
   ): Promise<DeviceCredentialRecord> {
@@ -35,7 +38,7 @@ describe("DeviceAuthenticationService", () => {
       findCredentialByCode: jest.fn().mockResolvedValue(await credential()),
     } as unknown as DeviceRepository;
     await expect(
-      new DeviceAuthenticationService(repository).authenticate(
+      new DeviceAuthenticationService(repository, limiter()).authenticate(
         "ESP32_DOOR_01",
         "correct-token",
       ),
@@ -63,11 +66,31 @@ describe("DeviceAuthenticationService", () => {
         findCredentialByCode: jest.fn().mockResolvedValue(record),
       } as unknown as DeviceRepository;
       await expect(
-        new DeviceAuthenticationService(repository).authenticate(
+        new DeviceAuthenticationService(repository, limiter()).authenticate(
           "ESP32_DOOR_01",
           token,
         ),
       ).rejects.toBeInstanceOf(UnauthorizedException);
     },
   );
+
+  it("rate limits repeated device authentication failures", async () => {
+    const repository = {
+      findCredentialByCode: jest.fn().mockResolvedValue(null),
+    } as unknown as DeviceRepository;
+    const attempts = new SecurityAttemptLimiter(
+      new ConfigService({ DEVICE_AUTH_MAX_FAILURES: 2 }),
+    );
+    const service = new DeviceAuthenticationService(repository, attempts);
+    await expect(
+      service.authenticate("DEVICE_TARGET", "wrong"),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(
+      service.authenticate("DEVICE_TARGET", "wrong"),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(
+      service.authenticate("DEVICE_TARGET", "wrong"),
+    ).rejects.toMatchObject({ status: 429 });
+    expect(repository.findCredentialByCode).toHaveBeenCalledTimes(2);
+  });
 });

@@ -11,4 +11,5 @@ export type AdminAccountRecord = {
 
 export interface AdminAccountRepository {
   findByEmail(email: string): Promise<AdminAccountRecord | null>;
+  findById(id: string): Promise<AdminAccountRecord | null>;
 }

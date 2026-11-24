@@ -84,6 +84,27 @@ export class PrismaFaceTemplateRepository implements FaceTemplateRepository {
       lastEnrolledAt: aggregate._max.created_at,
     };
   }
+
+  async deleteByPersonId(
+    personId: string,
+    actorAdminAccountId: string,
+  ): Promise<number> {
+    return this.prisma.$transaction(async (transaction) => {
+      const result = await transaction.faceTemplate.deleteMany({
+        where: { person_id: personId },
+      });
+      await transaction.adminAuditEvent.create({
+        data: {
+          actor_admin_account_id: actorAdminAccountId,
+          action: "FACE_TEMPLATES_DELETED",
+          entity_type: "PERSON",
+          entity_id: personId,
+          metadata: { deletedTemplateCount: result.count },
+        },
+      });
+      return result.count;
+    });
+  }
 }
 
 function parseVector(value: string): number[] {

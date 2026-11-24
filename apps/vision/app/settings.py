@@ -1,10 +1,14 @@
-from pydantic import Field
+from typing import Literal
+
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    environment: Literal["development", "test", "production"] = "development"
     service_name: str = "access-control-vision"
     service_token: str = "development-vision-token"
+    trusted_hosts: str = "vision,localhost,127.0.0.1,testserver"
     model_version: str = "fixture-face-v1"
     model_path: str | None = None
     model_checksum: str = "fixture"
@@ -18,6 +22,16 @@ class Settings(BaseSettings):
     minimum_sharpness: float = Field(default=45, ge=0)
     maximum_pose_degrees: float = Field(default=25, ge=0, le=90)
     duplicate_similarity: float = Field(default=0.995, ge=-1, le=1)
+
+    @model_validator(mode="after")
+    def reject_development_secret_outside_local(self) -> "Settings":
+        if self.environment == "production" and self.service_token == "development-vision-token":
+            raise ValueError("VISION_SERVICE_TOKEN must be rotated for production")
+        return self
+
+    @property
+    def trusted_host_list(self) -> list[str]:
+        return [value.strip() for value in self.trusted_hosts.split(",") if value.strip()]
 
     model_config = SettingsConfigDict(env_prefix="VISION_", extra="ignore")
 

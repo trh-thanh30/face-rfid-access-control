@@ -42,4 +42,14 @@ describe("reliability environment", () => {
       }),
     ).toThrow(`AUTH_SESSION_TTL_SECONDS must be 10`);
   });
+
+  it("rejects known development secrets in production", () => {
+    expect(() =>
+      validateEnvironment({
+        ...validEnvironment,
+        NODE_ENV: "production",
+        VISION_SERVICE_TOKEN: "development-vision-token",
+      }),
+    ).toThrow("VISION_SERVICE_TOKEN must be rotated for production");
+  });
 });

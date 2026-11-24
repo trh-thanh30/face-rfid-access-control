@@ -26,6 +26,10 @@ import {
 import { SchemaValidationPipe } from "../../common/pipes/schema-validation.pipe";
 import { AdminJwtGuard } from "../auth/guards/admin-jwt.guard";
 import {
+  AdminRolesGuard,
+  RequireAdminRoles,
+} from "../auth/guards/admin-roles.guard";
+import {
   DeviceAuthGuard,
   type DeviceRequest,
 } from "./guards/device-auth.guard";
@@ -61,7 +65,7 @@ export class DeviceApiController {
 }
 
 @Controller("v1/devices")
-@UseGuards(AdminJwtGuard)
+@UseGuards(AdminJwtGuard, AdminRolesGuard)
 export class DevicesAdminController {
   constructor(
     private readonly registerDevice: RegisterDeviceUseCase,
@@ -72,6 +76,7 @@ export class DevicesAdminController {
   ) {}
 
   @Post()
+  @RequireAdminRoles("SUPER_ADMIN")
   create(
     @Body(new SchemaValidationPipe(registerDeviceSchema))
     input: RegisterDeviceInput,
@@ -93,18 +98,20 @@ export class DevicesAdminController {
   }
 
   @Post(":id/rotate-credential")
+  @RequireAdminRoles("SUPER_ADMIN")
   rotate(@Param("id", ParseUUIDPipe) id: string) {
     return this.rotateCredential.execute(id);
   }
 
   @Patch(":id/disable")
+  @RequireAdminRoles("SUPER_ADMIN")
   disable(@Param("id", ParseUUIDPipe) id: string) {
     return this.disableDevice.execute(id);
   }
 }
 
 @Controller("v1/access-points")
-@UseGuards(AdminJwtGuard)
+@UseGuards(AdminJwtGuard, AdminRolesGuard)
 export class AccessPointsAdminController {
   constructor(
     private readonly createAccessPoint: CreateAccessPointUseCase,
@@ -112,6 +119,7 @@ export class AccessPointsAdminController {
   ) {}
 
   @Post()
+  @RequireAdminRoles("SUPER_ADMIN")
   create(
     @Body(new SchemaValidationPipe(createAccessPointSchema))
     input: CreateAccessPointInput,

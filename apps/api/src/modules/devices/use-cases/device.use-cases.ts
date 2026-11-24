@@ -14,6 +14,7 @@ import type {
   RegisterDeviceInput,
 } from "@access/shared";
 import * as bcrypt from "bcryptjs";
+import { SecurityAttemptLimiter } from "../../../common/security/security-attempt-limiter";
 import { CLOCK_PORT, type ClockPort } from "../../../common/clock/clock.port";
 import {
   AccessPointCodeConflictError,
@@ -33,19 +34,23 @@ export type DevicePrincipal = {
 export class DeviceAuthenticationService {
   constructor(
     @Inject(DEVICE_REPOSITORY) private readonly devices: DeviceRepository,
+    private readonly attempts: SecurityAttemptLimiter,
   ) {}
 
   async authenticate(
     deviceCode: string,
     token: string,
   ): Promise<DevicePrincipal> {
+    this.attempts.assertAllowed("DEVICE_AUTH", deviceCode);
     const device = await this.devices.findCredentialByCode(deviceCode);
     const valid = device
       ? await bcrypt.compare(token, device.tokenHash)
       : false;
     if (!device || device.status !== "ACTIVE" || !valid) {
+      this.attempts.recordFailure("DEVICE_AUTH", deviceCode);
       throw new UnauthorizedException("DEVICE_AUTHENTICATION_FAILED");
     }
+    this.attempts.recordSuccess("DEVICE_AUTH", deviceCode);
     return {
       id: device.id,
       deviceCode: device.deviceCode,

@@ -24,4 +24,8 @@ export interface FaceTemplateRepository {
     meanQualityScore: number | null;
     lastEnrolledAt: Date | null;
   }>;
+  deleteByPersonId(
+    personId: string,
+    actorAdminAccountId: string,
+  ): Promise<number>;
 }

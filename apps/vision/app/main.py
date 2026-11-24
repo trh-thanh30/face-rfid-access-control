@@ -1,4 +1,7 @@
+from secrets import compare_digest
+
 from fastapi import Depends, FastAPI, Header, HTTPException, status
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .adapters.cameras import FixtureCameraProvider, OpenCVCameraProvider
 from .adapters.engines import FixtureFaceEngine, InsightFaceEngine
@@ -49,10 +52,15 @@ def build_use_cases(configuration: Settings) -> VisionUseCases:
 
 use_cases = build_use_cases(settings)
 app = FastAPI(title="Access Control Vision", version="0.2.0")
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=settings.trusted_host_list,
+)
 
 
 async def require_service_token(authorization: str | None = Header(default=None)) -> None:
-    if authorization != f"Bearer {settings.service_token}":
+    expected = f"Bearer {settings.service_token}"
+    if authorization is None or not compare_digest(authorization, expected):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="INVALID_SERVICE_CREDENTIAL"
         )

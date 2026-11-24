@@ -1,14 +1,23 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import {
+  ADMIN_ACCOUNT_REPOSITORY,
+  type AdminAccountRepository,
+} from "../repository/admin-account.repository.interface";
 
 @Injectable()
 export class AdminJwtGuard implements CanActivate {
-  constructor(private readonly jwt: JwtService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    @Inject(ADMIN_ACCOUNT_REPOSITORY)
+    private readonly accounts: AdminAccountRepository,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{
@@ -29,10 +38,26 @@ export class AdminJwtGuard implements CanActivate {
         email: string;
         role: string;
       }>(token);
+      if (
+        !payload.sub ||
+        !payload.email ||
+        !["SUPER_ADMIN", "ADMIN"].includes(payload.role)
+      ) {
+        throw new Error("Invalid admin claims");
+      }
+      const account = await this.accounts.findById(payload.sub);
+      if (
+        !account ||
+        account.status !== "ACTIVE" ||
+        account.email !== payload.email ||
+        account.role !== payload.role
+      ) {
+        throw new Error("Admin session is no longer active");
+      }
       request.admin = {
-        id: payload.sub,
-        email: payload.email,
-        role: payload.role,
+        id: account.id,
+        email: account.email,
+        role: account.role,
       };
       return true;
     } catch {

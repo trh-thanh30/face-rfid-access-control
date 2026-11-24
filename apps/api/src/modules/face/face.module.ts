@@ -8,6 +8,7 @@ import { HttpVisionAdapter } from "./http-vision.adapter";
 import { PrismaFaceTemplateRepository } from "./prisma-face-template.repository";
 import { EnrollFaceUseCase } from "./enroll-face.use-case";
 import { FACE_VERIFIER_PORT } from "../sessions/face-verifier/face-verifier.port";
+import { DeleteFaceTemplatesUseCase } from "./delete-face-templates.use-case";
 
 @Module({
   imports: [AuthModule, PeopleModule],
@@ -22,6 +23,7 @@ import { FACE_VERIFIER_PORT } from "../sessions/face-verifier/face-verifier.port
     { provide: FACE_ENROLLMENT_PORT, useExisting: HttpVisionAdapter },
     { provide: FACE_VERIFIER_PORT, useExisting: HttpVisionAdapter },
     EnrollFaceUseCase,
+    DeleteFaceTemplatesUseCase,
   ],
   exports: [FACE_VERIFIER_PORT, FACE_TEMPLATE_REPOSITORY],
 })

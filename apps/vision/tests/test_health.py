@@ -6,6 +6,9 @@ from httpx import ASGITransport, AsyncClient
 
 from app.main import app, health
 from app.settings import settings
+from app.settings import Settings
+from pydantic import ValidationError
+import pytest
 
 
 def test_health() -> None:
@@ -24,6 +27,29 @@ def test_internal_api_requires_service_credential() -> None:
             assert response.status_code == 401
 
     asyncio.run(exercise())
+
+
+def test_internal_api_rejects_wrong_service_credential() -> None:
+    async def exercise() -> None:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://vision"
+        ) as client:
+            response = await client.post(
+                "/internal/v1/enrollments",
+                headers={"authorization": "Bearer wrong-token"},
+                json={},
+            )
+            assert response.status_code == 401
+
+    asyncio.run(exercise())
+
+
+def test_production_rejects_development_service_token() -> None:
+    with pytest.raises(ValidationError, match="must be rotated"):
+        Settings(
+            environment="production",
+            service_token="development-vision-token",
+        )
 
 
 def test_enrollment_templates_can_be_used_for_one_to_one_verification() -> None:
