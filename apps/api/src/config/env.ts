@@ -1,3 +1,8 @@
+import {
+  RELIABILITY_DEFAULTS,
+  RELIABILITY_PROFILE_VERSION,
+} from "@access/shared";
+
 export type AppEnvironment = {
   port: number;
   databaseUrl: string;
@@ -74,9 +79,51 @@ export function validateEnvironment(
   }
   values.VISION_VERIFICATION_THRESHOLD = threshold;
 
+  const reliabilityProfile = String(
+    values.RELIABILITY_PROFILE_VERSION ?? RELIABILITY_PROFILE_VERSION,
+  );
+  if (reliabilityProfile !== RELIABILITY_PROFILE_VERSION) {
+    throw new Error(
+      `RELIABILITY_PROFILE_VERSION must be ${RELIABILITY_PROFILE_VERSION}`,
+    );
+  }
+  const lockedValues = [
+    [
+      "DEVICE_OFFLINE_THRESHOLD_SECONDS",
+      offlineThreshold,
+      RELIABILITY_DEFAULTS.offlineThresholdMs / 1000,
+    ],
+    [
+      "AUTH_SESSION_TTL_SECONDS",
+      values.AUTH_SESSION_TTL_SECONDS,
+      RELIABILITY_DEFAULTS.sessionTtlMs / 1000,
+    ],
+    [
+      "ACTUATION_COMMAND_TTL_SECONDS",
+      values.ACTUATION_COMMAND_TTL_SECONDS,
+      RELIABILITY_DEFAULTS.commandTtlMs / 1000,
+    ],
+    [
+      "ACTUATION_OPEN_DURATION_MS",
+      values.ACTUATION_OPEN_DURATION_MS,
+      RELIABILITY_DEFAULTS.openDurationMs,
+    ],
+    [
+      "VISION_REQUEST_TIMEOUT_MS",
+      values.VISION_REQUEST_TIMEOUT_MS,
+      RELIABILITY_DEFAULTS.visionRequestTimeoutMs,
+    ],
+  ] as const;
+  for (const [key, actual, expected] of lockedValues) {
+    if (actual !== expected) {
+      throw new Error(`${key} must be ${expected} for ${reliabilityProfile}`);
+    }
+  }
+
   return {
     ...values,
     PORT: port,
     DEVICE_OFFLINE_THRESHOLD_SECONDS: offlineThreshold,
+    RELIABILITY_PROFILE_VERSION: reliabilityProfile,
   };
 }

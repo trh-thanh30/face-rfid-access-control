@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { URL } from "node:url";
 import { loadConfig } from "../dist/config.js";
+import { RELIABILITY_PROFILE_VERSION } from "@access/shared";
 
 test("simulator scaffold declares an explicit device token requirement", async () => {
   const source = await import("node:fs/promises").then(({ readFile }) =>
@@ -22,6 +23,7 @@ test("simulator timing configuration is typed and bounded", () => {
   assert.equal(config.pollInitialDelayMs, 100);
   assert.equal(config.pollMaxDelayMs, 800);
   assert.equal(config.ackMaxAttempts, 3);
+  assert.equal(config.reliabilityProfileVersion, RELIABILITY_PROFILE_VERSION);
   assert.throws(
     () =>
       loadConfig({

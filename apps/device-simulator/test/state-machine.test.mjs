@@ -201,6 +201,34 @@ test("ACK retries are bounded and do not re-run the actuator", async () => {
   assert.deepEqual(waits, [50, 50]);
 });
 
+test("actuator failure is acknowledged without changing the decision or retrying actuation", async () => {
+  const acknowledgements = [];
+  let actuatorAttempts = 0;
+  const setup = await fixture({
+    api: {
+      acknowledge: async (_sessionId, acknowledgement) =>
+        void acknowledgements.push(acknowledgement),
+    },
+    actuator: {
+      open: async () => {
+        actuatorAttempts += 1;
+        throw new Error("jammed");
+      },
+    },
+  });
+  const first = await setup.machine.run("04A1B2C3", "actuator-failure");
+  const retry = await setup.machine.run("04A1B2C3", "actuator-failure");
+  assert.equal(first.outcome, "ACTUATION_FAILED");
+  assert.equal(retry.outcome, "COMMAND_REPLAY_SKIPPED");
+  assert.equal(actuatorAttempts, 1);
+  assert.deepEqual(acknowledgements[0], {
+    commandId,
+    executionStatus: "FAILED",
+    timestamp: now.toISOString(),
+    errorCode: "VIRTUAL_ACTUATOR_FAILED",
+  });
+});
+
 test("interrupted reserved command is recovered as UNKNOWN without re-actuation", async () => {
   const setup = await fixture();
   await setup.store.reserve({ commandId, sessionId, deviceId, now });

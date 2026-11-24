@@ -27,6 +27,7 @@ void setup() {
   Serial.begin(115200);
   Serial.setTimeout(25);
   Serial.printf("\nAccess device %s; contract %s\n", FIRMWARE_VERSION, access_contract::kVersion);
+  Serial.println("Reliability profile wp09-v1");
   if (strlen(ACCESS_WIFI_SSID) == 0 || strlen(ACCESS_API_BASE_URL) == 0 ||
       strlen(ACCESS_DEVICE_CODE) == 0 || strlen(ACCESS_DEVICE_TOKEN) == 0) {
     Serial.println("FAIL_CLOSED: configure include/secrets.local.h");
@@ -58,8 +59,9 @@ void setup() {
   static EspHttpNetworkClient network(ACCESS_WIFI_SSID, ACCESS_WIFI_PASSWORD,
                                       ACCESS_API_BASE_URL, ACCESS_DEVICE_CODE,
                                       ACCESS_DEVICE_TOKEN);
-  static DeviceConfig config{ACCESS_DEVICE_CODE, FIRMWARE_VERSION, 15000, 500, 5000,
-                             2000, 500, 5000, 2000};
+  // Timing values are locked by reliability profile wp09-v1.
+  static DeviceConfig config{ACCESS_DEVICE_CODE, FIRMWARE_VERSION, 10000, 250, 1000,
+                             2000, 500, 30000, 1000};
   config.resetReason = std::to_string(static_cast<int>(esp_reset_reason()));
   static DeviceStateMachine runtime(config, rfid, actuator, sensor, indicator, store, network);
   machine = &runtime;

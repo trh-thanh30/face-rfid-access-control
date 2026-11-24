@@ -186,4 +186,27 @@ describe("CreateAccessSessionUseCase", () => {
       reasonCode: "FACE_MISMATCH",
     });
   });
+
+  it("fails closed with an infrastructure reason when Vision throws", async () => {
+    const test = fixture();
+    jest.mocked(test.verifier.verify).mockRejectedValue(new Error("offline"));
+    const result = await test.useCase.execute(principal, request);
+    expect(result).toMatchObject({
+      status: "DENIED",
+      reasonCode: "INTERNAL_ERROR",
+    });
+    expect(result).not.toHaveProperty("command");
+    expect(test.allowCount()).toBe(0);
+  });
+
+  it("returns the same command for duplicate polls", async () => {
+    const test = fixture();
+    const created = await test.useCase.execute(principal, request);
+    const poll = new PollAccessSessionUseCase(test.repository, clock);
+    const [first, second] = await Promise.all([
+      poll.execute(principal, created.sessionId),
+      poll.execute(principal, created.sessionId),
+    ]);
+    expect(first.command).toEqual(second.command);
+  });
 });

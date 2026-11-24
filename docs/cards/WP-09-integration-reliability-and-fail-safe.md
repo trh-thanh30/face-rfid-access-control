@@ -1,11 +1,11 @@
 # WP-09 — Integration Reliability and Fail-safe
 
-| Thuộc tính | Giá trị                                             |
-| ---------- | --------------------------------------------------- |
-| Trạng thái | Todo                                                |
-| Tuần       | 5                                                   |
-| Ưu tiên    | Critical                                            |
-| Bề mặt     | API, Vision, Simulator, firmware, database, network |
+| Thuộc tính | Giá trị                                              |
+| ---------- | ---------------------------------------------------- |
+| Trạng thái | Partial — software automation done; hardware pending |
+| Tuần       | 5                                                    |
+| Ưu tiên    | Critical                                             |
+| Bề mặt     | API, Vision, Simulator, firmware, database, network  |
 
 ## Outcome
 
@@ -36,15 +36,24 @@ Toàn hệ thống giữ đúng quyết định và trạng thái vật lý khi 
 
 ## Tasks
 
-| ID       | Task                                   | Trạng thái |
-| -------- | -------------------------------------- | ---------- |
-| WP09-001 | Chốt timeout/poll/retry config version | Todo       |
-| WP09-002 | Correlation/latency spans              | Todo       |
-| WP09-003 | Concurrent session/idempotency tests   | Todo       |
-| WP09-004 | Vision/camera failure tests            | Todo       |
-| WP09-005 | Command replay/reboot tests            | Todo       |
-| WP09-006 | Offline detection/recovery tests       | Todo       |
-| WP09-007 | Fault matrix evidence                  | Todo       |
+| ID       | Task                                   | Trạng thái                       |
+| -------- | -------------------------------------- | -------------------------------- |
+| WP09-001 | Chốt timeout/poll/retry config version | Done — `wp09-v1`                 |
+| WP09-002 | Correlation/latency spans              | Done — logs + persisted spans    |
+| WP09-003 | Concurrent session/idempotency tests   | Done                             |
+| WP09-004 | Vision/camera failure tests            | Done                             |
+| WP09-005 | Command replay/reboot tests            | Done — simulator + firmware host |
+| WP09-006 | Offline detection/recovery tests       | Done — server-clock policy       |
+| WP09-007 | Fault matrix evidence                  | Partial — hardware row pending   |
+
+## Evidence
+
+- Locked profile: `docs/reliability/wp09-v1.md`.
+- Fault matrix/TC mapping: `docs/reliability/wp09-fault-matrix.md`.
+- API Decision/Command/Event transaction: `PrismaSessionRepository`.
+- Simulator and firmware both reserve command before actuation and recover pending ACK without re-actuation.
+
+WP09 software scope is implemented. Overall card remains Partial because power, actuator and door-feedback fault evidence require the selected physical hardware.
 
 ## Acceptance
 

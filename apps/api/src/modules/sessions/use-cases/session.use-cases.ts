@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -33,6 +34,7 @@ import {
 
 @Injectable()
 export class CreateAccessSessionUseCase {
+  private readonly logger = new Logger(CreateAccessSessionUseCase.name);
   private readonly sessionTtlMs: number;
   private readonly commandTtlMs: number;
   private readonly openDurationMs: number;
@@ -179,12 +181,23 @@ export class CreateAccessSessionUseCase {
   }
 
   private currentResponse(session: SessionRecord) {
-    return toResponse(session, this.clock.now());
+    const now = this.clock.now();
+    this.logger.log({
+      event: "auth_session_response",
+      correlationId: session.correlationId,
+      sessionId: session.id,
+      status: session.status,
+      decisionLatencyMs: session.completedAt
+        ? elapsedMs(session.createdAt, session.completedAt)
+        : undefined,
+    });
+    return toResponse(session, now);
   }
 }
 
 @Injectable()
 export class PollAccessSessionUseCase {
+  private readonly logger = new Logger(PollAccessSessionUseCase.name);
   constructor(
     @Inject(SESSION_REPOSITORY) private readonly sessions: SessionRepository,
     @Inject(CLOCK_PORT) private readonly clock: ClockPort,
@@ -203,12 +216,19 @@ export class PollAccessSessionUseCase {
     ) {
       session = await this.sessions.expire(session.id, now);
     }
+    this.logger.log({
+      event: "auth_session_poll",
+      correlationId: session.correlationId,
+      sessionId: session.id,
+      status: session.status,
+    });
     return toResponse(session, now);
   }
 }
 
 @Injectable()
 export class AcknowledgeCommandUseCase {
+  private readonly logger = new Logger(AcknowledgeCommandUseCase.name);
   constructor(
     @Inject(SESSION_REPOSITORY) private readonly sessions: SessionRepository,
     @Inject(DEVICE_REPOSITORY) private readonly devices: DeviceRepository,
@@ -238,11 +258,22 @@ export class AcknowledgeCommandUseCase {
       deviceTimestamp: new Date(acknowledgement.timestamp),
       receivedAt: this.clock.now(),
     });
+    this.logger.log({
+      event: "actuation_ack",
+      sessionId,
+      commandId: acknowledgement.commandId,
+      executionStatus: acknowledgement.executionStatus,
+      result,
+    });
     if (result === "NOT_FOUND")
       throw new NotFoundException("COMMAND_NOT_FOUND");
     if (result === "EXPIRED") throw new ConflictException("COMMAND_EXPIRED");
     if (result === "CONFLICT") throw new ConflictException("ACK_CONFLICT");
   }
+}
+
+function elapsedMs(startedAt: Date, completedAt: Date): number {
+  return Math.max(0, completedAt.getTime() - startedAt.getTime());
 }
 
 function toResponse(session: SessionRecord, now: Date): AccessSessionResponse {

@@ -26,6 +26,7 @@ try {
     console.log(JSON.stringify({ event, ...details }));
   log("SIMULATOR_START", {
     deviceCode: config.deviceCode,
+    reliabilityProfileVersion: config.reliabilityProfileVersion,
     scenario: input.scenario,
     uidHint: maskUid(input.uid),
   });

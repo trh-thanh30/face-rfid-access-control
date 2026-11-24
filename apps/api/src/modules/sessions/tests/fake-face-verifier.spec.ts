@@ -33,4 +33,19 @@ describe("FakeFaceVerifierAdapter", () => {
       FaceVerifierInfrastructureError,
     );
   });
+
+  it("serializes camera ownership and fails a concurrent capture closed", async () => {
+    const adapter = new FakeFaceVerifierAdapter(
+      new ConfigService({ FAKE_FACE_MODE: "allow" }),
+    );
+    const [first, concurrent] = await Promise.all([
+      adapter.verify(input),
+      adapter.verify({ ...input, sessionId: "other-session" }),
+    ]);
+    expect(first.matched).toBe(true);
+    expect(concurrent).toMatchObject({
+      matched: false,
+      reasonCode: "CAMERA_BUSY",
+    });
+  });
 });

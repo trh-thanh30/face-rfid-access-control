@@ -101,9 +101,10 @@ export class PrismaSessionRepository implements SessionRepository {
             result: "DENIED",
             reason_code: input.reasonCode,
             similarity: input.evidence?.similarity,
-            latency_ms: input.evidence?.latencyMs,
+            latency_ms: elapsedMs(session.created_at, input.completedAt),
             metadata: input.evidence
               ? {
+                  visionLatencyMs: input.evidence.latencyMs,
                   modelVersion: input.evidence.modelVersion,
                   pipelineFingerprint: input.evidence.pipelineFingerprint,
                   validFrameCount: input.evidence.validFrameCount,
@@ -153,8 +154,9 @@ export class PrismaSessionRepository implements SessionRepository {
             deduplication_key: `DECISION:${session.id}`,
             result: "ALLOWED",
             similarity: input.evidence.similarity,
-            latency_ms: input.evidence.latencyMs,
+            latency_ms: elapsedMs(session.created_at, input.completedAt),
             metadata: {
+              visionLatencyMs: input.evidence.latencyMs,
               modelVersion: input.evidence.modelVersion,
               pipelineFingerprint: input.evidence.pipelineFingerprint,
               validFrameCount: input.evidence.validFrameCount,
@@ -190,6 +192,7 @@ export class PrismaSessionRepository implements SessionRepository {
             deduplication_key: `DECISION:${session.id}`,
             result: "EXPIRED",
             reason_code: "SESSION_EXPIRED",
+            latency_ms: elapsedMs(session.created_at, completedAt),
             occurred_at: completedAt,
           },
         });
@@ -212,13 +215,13 @@ export class PrismaSessionRepository implements SessionRepository {
         include: { session: true },
       });
       if (!command) return "NOT_FOUND";
-      if (command.expires_at < input.receivedAt) return "EXPIRED";
       if (command.acknowledged_at) {
         return command.execution_status === input.executionStatus &&
           command.error_code === (input.errorCode ?? null)
           ? "DUPLICATE"
           : "CONFLICT";
       }
+      if (command.expires_at < input.receivedAt) return "EXPIRED";
       const claimed = await transaction.actuationCommand.updateMany({
         where: { id: command.id, acknowledged_at: null },
         data: {
@@ -228,7 +231,15 @@ export class PrismaSessionRepository implements SessionRepository {
           device_acknowledged_at: input.deviceTimestamp,
         },
       });
-      if (claimed.count === 0) return "DUPLICATE";
+      if (claimed.count === 0) {
+        const concurrent = await transaction.actuationCommand.findUnique({
+          where: { id: command.id },
+        });
+        return concurrent?.execution_status === input.executionStatus &&
+          concurrent.error_code === (input.errorCode ?? null)
+          ? "DUPLICATE"
+          : "CONFLICT";
+      }
       await transaction.accessEvent.create({
         data: {
           session_id: command.session_id,
@@ -239,7 +250,13 @@ export class PrismaSessionRepository implements SessionRepository {
           deduplication_key: `ACTUATION:${command.id}`,
           result: input.executionStatus,
           reason_code: input.errorCode,
-          metadata: { commandId: command.id },
+          latency_ms: command.session.completed_at
+            ? elapsedMs(command.session.completed_at, input.receivedAt)
+            : undefined,
+          metadata: {
+            commandId: command.id,
+            deviceTimestamp: input.deviceTimestamp.toISOString(),
+          },
           occurred_at: input.receivedAt,
         },
       });
@@ -296,4 +313,8 @@ function isUniqueConflict(error: unknown): boolean {
     error instanceof Prisma.PrismaClientKnownRequestError &&
     error.code === "P2002"
   );
+}
+
+function elapsedMs(startedAt: Date, completedAt: Date): number {
+  return Math.max(0, completedAt.getTime() - startedAt.getTime());
 }

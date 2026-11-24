@@ -1,4 +1,10 @@
+import {
+  RELIABILITY_DEFAULTS,
+  RELIABILITY_PROFILE_VERSION,
+} from "@access/shared";
+
 export type SimulatorConfig = {
+  reliabilityProfileVersion: string;
   apiUrl: string;
   deviceCode: string;
   deviceToken: string;
@@ -35,19 +41,20 @@ export function loadConfig(
   const pollInitialDelayMs = integer(
     environment,
     "SIMULATOR_POLL_INITIAL_MS",
-    250,
+    RELIABILITY_DEFAULTS.pollInitialDelayMs,
     10,
     10_000,
   );
   const pollMaxDelayMs = integer(
     environment,
     "SIMULATOR_POLL_MAX_MS",
-    1_000,
+    RELIABILITY_DEFAULTS.pollMaxDelayMs,
     pollInitialDelayMs,
     30_000,
   );
 
   return {
+    reliabilityProfileVersion: RELIABILITY_PROFILE_VERSION,
     apiUrl,
     deviceCode: environment.DEVICE_CODE ?? "ESP32_DOOR_01",
     deviceToken: environment.DEVICE_TOKEN!,
@@ -55,7 +62,7 @@ export function loadConfig(
     heartbeatIntervalMs: integer(
       environment,
       "SIMULATOR_HEARTBEAT_INTERVAL_MS",
-      10_000,
+      RELIABILITY_DEFAULTS.heartbeatIntervalMs,
       1_000,
       300_000,
     ),
@@ -64,21 +71,21 @@ export function loadConfig(
     pollTimeoutMs: integer(
       environment,
       "SIMULATOR_POLL_TIMEOUT_MS",
-      12_000,
+      RELIABILITY_DEFAULTS.pollTimeoutMs,
       100,
       300_000,
     ),
     ackRetryDelayMs: integer(
       environment,
       "SIMULATOR_ACK_RETRY_MS",
-      500,
+      RELIABILITY_DEFAULTS.ackRetryDelayMs,
       10,
       60_000,
     ),
     ackMaxAttempts: integer(
       environment,
       "SIMULATOR_ACK_MAX_ATTEMPTS",
-      5,
+      RELIABILITY_DEFAULTS.ackMaxAttempts,
       1,
       100,
     ),

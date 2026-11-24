@@ -68,4 +68,22 @@ describe("AcknowledgeCommandUseCase", () => {
       ),
     ).rejects.toBeInstanceOf(ConflictException);
   });
+
+  it("rejects a conflicting acknowledgement", async () => {
+    const sessions = {
+      acknowledge: jest.fn().mockResolvedValue("CONFLICT"),
+    } as unknown as SessionRepository;
+    const devices = {
+      findById: jest
+        .fn()
+        .mockResolvedValue({ capabilities: { doorSensor: false } }),
+    } as unknown as DeviceRepository;
+    await expect(
+      new AcknowledgeCommandUseCase(sessions, devices, clock).execute(
+        principal,
+        "session-id",
+        acknowledgement,
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
 });
