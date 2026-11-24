@@ -2,7 +2,7 @@
 
 | Thuộc tính | Giá trị                                                       |
 | ---------- | ------------------------------------------------------------- |
-| Trạng thái | Partial scaffold                                              |
+| Trạng thái | Partial — firmware core done, hardware evidence pending       |
 | Tuần       | 5                                                             |
 | Ưu tiên    | Critical                                                      |
 | Bề mặt     | PlatformIO firmware, ESP32, RFID, actuator, indicators, power |
@@ -18,10 +18,10 @@ Firmware nằm tại `firmware/esp32-access-device/`, không nằm trong `apps/`
 ## Ports/adapters
 
 ```text
-RfidReader    → Mfrc522Reader | FakeRfidReader
-DoorActuator  → ServoActuator | RelayActuator | FakeActuator
+RfidReader    → Mfrc522Reader | SerialRfidReader
+DoorActuator  → ServoActuator | RelayActuator | TimedFakeActuator
 DoorSensor    → ReedSwitchSensor | NoDoorSensor
-Indicator     → LedBuzzerIndicator | SerialIndicator
+Indicator     → GpioIndicator | SerialIndicator
 CommandStore  → ESP32 NVS
 NetworkClient → ESP HTTP adapter
 ```
@@ -39,15 +39,25 @@ NetworkClient → ESP HTTP adapter
 
 ## Tasks
 
-| ID       | Task                                      | Trạng thái |
-| -------- | ----------------------------------------- | ---------- |
-| WP08-001 | PlatformIO scaffold không hardcode GPIO   | Done       |
-| WP08-002 | Chốt part numbers/datasheets/power budget | Todo       |
-| WP08-003 | Board profile và RFID adapter             | Todo       |
-| WP08-004 | Network/session state machine             | Todo       |
-| WP08-005 | CommandStore và replay protection         | Todo       |
-| WP08-006 | Actuator/indicator/sensor adapters        | Todo       |
-| WP08-007 | Fault/reboot/power tests                  | Todo       |
+| ID       | Task                                      | Trạng thái                          |
+| -------- | ----------------------------------------- | ----------------------------------- |
+| WP08-001 | PlatformIO scaffold không hardcode GPIO   | Done                                |
+| WP08-002 | Chốt part numbers/datasheets/power budget | Blocked — chưa chốt hardware        |
+| WP08-003 | Board profile và RFID adapter             | Partial — code xong, chờ board thật |
+| WP08-004 | Network/session state machine             | Done — host-tested                  |
+| WP08-005 | CommandStore và replay protection         | Done — NVS + host tests             |
+| WP08-006 | Actuator/indicator/sensor adapters        | Partial — chờ bench test            |
+| WP08-007 | Fault/reboot/power tests                  | Partial — host tests; power pending |
+
+## Evidence hiện có
+
+- Non-blocking core trong `firmware/esp32-access-device/lib/device_core/`.
+- ESP HTTP, NVS, MFRC522, relay, servo, reed switch và safe fixture adapters.
+- `scripts/test-native.sh` cover allow, sensor/no-sensor, wrong device, expiry, clock, offline và pending ACK sau reboot.
+- Scenario chung: `docs/protocol/device-protocol-scenarios.md`.
+- Form phần cứng/nguồn: `docs/hardware/hardware-selection-and-wiring.md`.
+
+WP08 chưa đạt Definition of Done/M4 tới khi có board thật, PlatformIO build/flash và evidence nguồn/wiring.
 
 ## Acceptance
 

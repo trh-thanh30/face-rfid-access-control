@@ -26,3 +26,8 @@ packages/shared/src/**/*.js
 packages/shared/src/**/*.js.map
 packages/shared/src/**/*.d.ts
 packages/shared/src/**/*.d.ts.map
+
+# ESP32 local credentials and build output.
+firmware/esp32-access-device/include/secrets.local.h
+firmware/esp32-access-device/.pio/
+firmware/esp32-access-device/platformio.local.ini
