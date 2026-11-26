@@ -1,0 +1,10 @@
+tc_id,mode,status,evidence,notes
+TC-01,AUTOMATED_SOFTWARE,PASS,apps/api/src/modules/sessions/tests/create-session.spec.ts,Synthetic/fake Vision path
+TC-02,AUTOMATED_SOFTWARE,PASS,apps/api/src/modules/access-management/tests/rfid-identity.spec.ts,Unknown RFID denied before Vision
+TC-03,AUTOMATED_SOFTWARE,PASS,apps/api/src/modules/sessions/tests/create-session.spec.ts,FACE_MISMATCH persisted
+TC-04,AUTOMATED_SOFTWARE,PASS,apps/api/src/modules/access-management/tests/check-access-eligibility.spec.ts,Disabled Person denied
+TC-05,AUTOMATED_SOFTWARE,PASS,apps/api/src/modules/access-management/tests/access-window.spec.ts,Access window denied
+TC-06,AUTOMATED_SOFTWARE,PASS,apps/device-simulator/test/state-machine.test.mjs,Network error keeps virtual door closed
+TC-07,AUTOMATED_SOFTWARE,PASS,apps/api/src/modules/sessions/tests/fake-face-verifier.spec.ts,Timeout/camera busy fail closed
+TC-08,AUTOMATED_SOFTWARE,PASS,apps/api/src/modules/sessions/tests/create-session.spec.ts,Duplicate create/poll idempotent
+TC-09,AUTOMATED_PLUS_HARDWARE_PENDING,PARTIAL,apps/device-simulator/test/state-machine.test.mjs,Virtual failure/reboot pass; real actuator sensor and power pending

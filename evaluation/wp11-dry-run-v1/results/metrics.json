@@ -1,0 +1,109 @@
+{
+  "evaluationVersion": "wp11-dry-run-v1",
+  "dataClassification": "SYNTHETIC_DRY_RUN",
+  "warning": "Synthetic dry-run only; do not report as measured biometric performance.",
+  "thresholdSelection": {
+    "sourceSplit": "CALIBRATION",
+    "objective": "minimum balanced error; tie: lower FAR, then higher threshold",
+    "threshold": 0.705,
+    "calibrationMetrics": {
+      "threshold": 0.705,
+      "genuineAttempts": 4,
+      "impostorAttempts": 4,
+      "trueAccepts": 4,
+      "trueRejects": 4,
+      "falseAccepts": 0,
+      "falseRejects": 0,
+      "far": 0,
+      "frr": 0,
+      "accuracy": 1,
+      "balancedErrorRate": 0
+    }
+  },
+  "finalTest": {
+    "biometric": {
+      "threshold": 0.705,
+      "genuineAttempts": 4,
+      "impostorAttempts": 4,
+      "trueAccepts": 3,
+      "trueRejects": 3,
+      "falseAccepts": 1,
+      "falseRejects": 1,
+      "far": 0.25,
+      "frr": 0.25,
+      "accuracy": 0.75,
+      "balancedErrorRate": 0.25
+    },
+    "system": {
+      "totalAttempts": 10,
+      "excludedAttempts": 0,
+      "correctDecisions": 7,
+      "accuracy": 0.7,
+      "genuineSuccesses": 3,
+      "genuineAttempts": 5,
+      "genuineSuccessRate": 0.6,
+      "impostorRejections": 4,
+      "impostorAttempts": 5,
+      "impostorRejectionRate": 0.8,
+      "captureFailures": 2,
+      "captureFailureRate": 0.2,
+      "captureFailureReasons": {
+        "NO_FACE": 1,
+        "LOW_QUALITY": 1
+      },
+      "infrastructureFailures": 0,
+      "infrastructureFailureRate": 0
+    }
+  },
+  "latency": {
+    "rfidToCreateMs": {
+      "count": 10,
+      "median": 36.5,
+      "p95": 41.55,
+      "max": 42
+    },
+    "precheckMs": {
+      "count": 10,
+      "median": 18.5,
+      "p95": 20.55,
+      "max": 21
+    },
+    "visionMs": {
+      "count": 10,
+      "median": 407.5,
+      "p95": 457.75,
+      "max": 460
+    },
+    "decisionMs": {
+      "count": 10,
+      "median": 475,
+      "p95": 528.3,
+      "max": 531
+    },
+    "commandToActuationMs": {
+      "count": 4,
+      "median": 45.5,
+      "p95": 47.85,
+      "max": 48
+    },
+    "actuationToAckMs": {
+      "count": 4,
+      "median": 89.5,
+      "p95": 92.7,
+      "max": 93
+    },
+    "endToEndMs": {
+      "count": 10,
+      "median": 480.5,
+      "p95": 667.85,
+      "max": 671
+    }
+  },
+  "functionalTests": {
+    "total": 9,
+    "passed": 8,
+    "partial": 1,
+    "failed": 0
+  },
+  "generatedAt": "2026-11-24T00:00:00.000Z"
+}

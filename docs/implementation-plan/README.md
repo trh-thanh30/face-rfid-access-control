@@ -23,7 +23,7 @@ Xây dựng một hệ thống một cửa có thể:
 | 3    | Dịch vụ khuôn mặt      | Webcam/fixture xác minh 1:1 qua Vision API        | Not started               |
 | 4    | Admin hoàn chỉnh       | Quản lý người, thẻ, quyền, thiết bị và lịch sử    | Not started               |
 | 5    | Tích hợp phần cứng     | ESP32 thay simulator trên cùng API contract       | Not started               |
-| 6    | Thử nghiệm và đánh giá | FAR/FRR, latency, test lỗi và số liệu báo cáo     | Not started               |
+| 6    | Thử nghiệm và đánh giá | FAR/FRR, latency, test lỗi và số liệu báo cáo     | In progress (dry-run)     |
 
 Trạng thái hợp lệ: `Not started`, `In progress`, `Blocked`, `Done`.
 

@@ -1,0 +1,21 @@
+{
+  "evaluationVersion": "wp11-dry-run-v1",
+  "status": "DRY_RUN_ONLY",
+  "dataClassification": "SYNTHETIC_DRY_RUN",
+  "analysisTimestamp": "2026-11-24T00:00:00.000Z",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "reliabilityProfile": "wp09-v1",
+  "modelVersion": "fixture-face-v1",
+  "pipelineFingerprint": "fixture-synthetic-dry-run",
+  "firmwareVersion": "simulator-0.1.0",
+  "cameraProvider": "fixture",
+  "embeddingDimension": 512,
+  "minimumValidFrames": 3,
+  "thresholdSelection": "MIN_BALANCED_ERROR_CALIBRATION_ONLY",
+  "percentileMethod": "LINEAR_INTERPOLATION",
+  "predeclaredExclusionRules": [
+    "OPERATOR_PROTOCOL_DEVIATION",
+    "DUPLICATE_ATTEMPT_ID",
+    "UNPLANNED_DEVICE_CHANGE"
+  ]
+}

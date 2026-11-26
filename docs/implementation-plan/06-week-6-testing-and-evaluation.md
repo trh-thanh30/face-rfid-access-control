@@ -64,17 +64,17 @@ Khóa cấu hình, chạy thử nghiệm có thể tái lập và tạo bộ s�
 
 ## 5. Ma trận chức năng tối thiểu
 
-| Mã | Kịch bản | Kỳ vọng |
-| --- | --- | --- |
-| TC-01 | Thẻ đúng, mặt đúng, còn quyền | ALLOWED, command hợp lệ, event đầy đủ |
-| TC-02 | Thẻ chưa đăng ký | Từ chối trước Vision |
-| TC-03 | Thẻ đúng, mặt người khác | `FACE_MISMATCH` |
-| TC-04 | Person bị khóa | Từ chối trước Vision |
-| TC-05 | Ngoài khung giờ | `NO_PERMISSION`/reason cụ thể đã chốt |
-| TC-06 | API mất kết nối | Cửa đóng, Device báo network error |
-| TC-07 | Camera/Vision không sẵn sàng | Không mở, lưu infrastructure reason |
-| TC-08 | Retry cùng request ID | Một logical session/decision/command |
-| TC-09 | Actuator/door feedback lỗi | Decision giữ nguyên, actuation failed/unknown |
+| Mã    | Kịch bản                      | Kỳ vọng                                       |
+| ----- | ----------------------------- | --------------------------------------------- |
+| TC-01 | Thẻ đúng, mặt đúng, còn quyền | ALLOWED, command hợp lệ, event đầy đủ         |
+| TC-02 | Thẻ chưa đăng ký              | Từ chối trước Vision                          |
+| TC-03 | Thẻ đúng, mặt người khác      | `FACE_MISMATCH`                               |
+| TC-04 | Person bị khóa                | Từ chối trước Vision                          |
+| TC-05 | Ngoài khung giờ               | `NO_PERMISSION`/reason cụ thể đã chốt         |
+| TC-06 | API mất kết nối               | Cửa đóng, Device báo network error            |
+| TC-07 | Camera/Vision không sẵn sàng  | Không mở, lưu infrastructure reason           |
+| TC-08 | Retry cùng request ID         | Một logical session/decision/command          |
+| TC-09 | Actuator/door feedback lỗi    | Decision giữ nguyên, actuation failed/unknown |
 
 ## 6. Công thức và báo cáo
 
@@ -149,3 +149,17 @@ Không commit ảnh hoặc dữ liệu nhận dạng thật nếu repository/acc
 - Script và output tables/charts.
 - Test run logs và video lỗi quan trọng.
 - Code commit, migration, model checksum và firmware version.
+
+## 12. Trạng thái WP11 hiện tại
+
+Đã có package [`evaluation/wp11-dry-run-v1`](../../evaluation/wp11-dry-run-v1/README.md) để kiểm tra toàn bộ schema và luồng sinh kết quả:
+
+- data dictionary, anonymized synthetic IDs và ba capture ID độc lập;
+- chọn threshold chỉ từ calibration và khóa trước khi tính test metrics;
+- confusion counts, FAR/FRR/accuracy, capture/infrastructure failures;
+- median/P95/max cho từng latency span;
+- bảng threshold sweep, biểu đồ score, manifest hash và code revision;
+- TC-01–TC-08 có software evidence; TC-09 còn thiếu hardware evidence;
+- limitations và threats to validity được lưu cùng package.
+
+Đây chỉ là **synthetic dry-run**, không hoàn thành W6-01..W6-04, W6-06..W6-09, W6-11..W6-20 hoặc M5 final. Trước final run, nhóm vẫn phải chốt protocol/consent, camera/model/hardware thật, thu dữ liệu độc lập và tạo evaluation version `LOCKED` mới.

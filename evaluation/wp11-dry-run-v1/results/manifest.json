@@ -1,0 +1,23 @@
+{
+  "codeRevision": "c1d2111a062b1a6c9759087f02ae8bc5a98a44bc",
+  "worktreeNote": "codeRevision records HEAD; archive a final evaluation only from a clean committed worktree",
+  "configSha256": "0dddbddada6686da31704396b9cbca00ecfe9d1369837e015ad9e258dcb8ff6f",
+  "inputFiles": {
+    "config.json": "0dddbddada6686da31704396b9cbca00ecfe9d1369837e015ad9e258dcb8ff6f",
+    "protocol.md": "fb2af76080a14f6e7d94dfcac11d910ee7b9d76d3da86d7eea358c7dcde25717",
+    "data-dictionary.md": "c279a24cdb7ccf60cdfd4a3efd2d542101dfd91b5c7922ded79c9170936980fe",
+    "limitations.md": "e9dea5b9d2a7c663084b0376d63a667ab8b4fb81a311628219d083ac303a9b19",
+    "participants.csv": "f14ee4d1ec8ba8077eee501f20c2cebc8e2f350ea19fe5de2f8e7d2ac536893e",
+    "attempts.csv": "c7d82a422c70e318597faa2003b5a3185e303e8164ed79aece5e5e7403768a32",
+    "raw-scores.csv": "782aebf4df6a8e365280ced330f0b6489f8342671833d7af9d2712de273cfe2a",
+    "latency.csv": "f8a78cb369db57ca45bb3e67a00f78e65d475cf7c4fa8aa2a5fe871a24872bb6",
+    "exclusions.csv": "199937d922f7e4a5122c4c73268f35fb7e3047f249d1a5e76f140f966c0b5e91",
+    "functional-tests.csv": "4547ec73fead48aafb673533ffa34f2789d6ea576af9743f0391fa48f3c2a9e5"
+  },
+  "outputFiles": {
+    "results/metrics.json": "341fe54c48adb274e9fe5dad743692893ec8cbd34a61c31b5c51cef10a6adbb8",
+    "results/threshold-sweep.csv": "20d0fb143274af24fb16618d045e2da5f4578d2ee13196ac1125c98f5ba670d2",
+    "results/summary.md": "511d43e9ebc321aa6bf8f1e594d18b2d6705ebe6d383ebb2f8696e4ded4485ff",
+    "results/score-distribution.svg": "9437a4bbd3d319cc94acabe78824e3e44332f125d18567352d5c6e1f42962138"
+  }
+}
